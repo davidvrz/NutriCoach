@@ -1,3 +1,5 @@
+import sirope
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -15,7 +17,11 @@
         <ul>
             {% for semana in semanas %}
             <li>
-                {{ semana.fecha_inicio }} - {{ semana.fecha_fin }}<br>
+                <a
+                    href="{{ url_for('cliente.ver_semana', cliente_email=cliente.email, safe_id=sirope.safe_from_oid(semana.__oid__)) }}">
+                    {{ semana.fecha_inicio.strftime("%d/%m") }} - {{ semana.fecha_fin.strftime("%d/%m") }}
+                </a><br>
+
                 Estado: {{ semana.estado_general }}<br>
                 Objetivos: {{ semana.objetivos.calorias }} kcal
             </li>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Editar día {{ fecha.strftime("%A %d/%m") }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Día {{ fecha.strftime("%A %d/%m") }}</h1>
+        <form method="post">
+            <input type="text" name="estado" placeholder="Estado del día" value="{{ plan.estado if plan else '' }}"
+                required>
+            <textarea name="notas" placeholder="Notas...">{{ plan.notas if plan else '' }}</textarea>
+
+            {% for comida in ["desayuno", "comida", "merienda", "cena", "snacks"] %}
+            <h3>{{ comida.capitalize() }}</h3>
+            <input type="text" name="{{ comida }}_desc" placeholder="Descripción"
+                value="{{ plan.comidas[comida].descripcion if plan and plan.comidas.get(comida) else '' }}">
+            <input type="number" name="{{ comida }}_cal" placeholder="Calorías"
+                value="{{ plan.comidas[comida].calorias if plan and plan.comidas.get(comida) else '' }}">
+            <input type="number" name="{{ comida }}_prot" placeholder="Proteínas (g)"
+                value="{{ plan.comidas[comida].proteinas if plan and plan.comidas.get(comida) else '' }}">
+            <input type="number" name="{{ comida }}_hidr" placeholder="Hidratos (g)"
+                value="{{ plan.comidas[comida].hidratos if plan and plan.comidas.get(comida) else '' }}">
+            <input type="number" name="{{ comida }}_gras" placeholder="Grasas (g)"
+                value="{{ plan.comidas[comida].grasas if plan and plan.comidas.get(comida) else '' }}">
+            {% endfor %}
+
+            <button type="submit">Guardar</button>
+        </form>
+        <a href="{{ url_for('cliente.ver_semana', cliente_email=cliente_email, safe_id=safe_id) }}">← Volver a la
+            semana</a>
+    </div>
+</body>
+
+</html>

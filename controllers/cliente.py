@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 import sirope
 from models.cliente import Cliente
 from models.semana_nutricional import SemanaNutricional
+from models.plan_diario import PlanAlimenticioDiario
 from datetime import datetime, timedelta
 
 bp = Blueprint("cliente", __name__, url_prefix="/clientes")
@@ -88,3 +89,70 @@ def nueva_semana(cliente_email):
     ult_obj = ultima[0].objetivos if ultima else {"calorias": "", "proteinas": "", "hidratos": "", "grasas": ""}
 
     return render_template("clientes/nueva_semana.html", cliente=cliente, objetivos=ult_obj)
+
+@bp.route("/<cliente_email>/semana/<safe_id>")
+@login_required
+def ver_semana(cliente_email, safe_id):
+    oid = sirope.oid_from_safe(safe_id)
+    semana = srp.load(oid)
+
+    if not semana or semana.cliente_email != cliente_email:
+        flash("Semana no encontrada.")
+        return redirect(url_for("cliente.dashboard_cliente", cliente_email=cliente_email))
+
+    # Obtener planes existentes
+    planes = list(srp.filter(PlanAlimenticioDiario, lambda p: p.id_semana == oid))
+    planes_por_fecha = {p.fecha.strftime('%Y-%m-%d'): p for p in planes}
+
+    # Generar los 7 días
+    dias = []
+    for i in range(7):
+        dia = semana.fecha_inicio + timedelta(days=i)
+        clave = dia.strftime('%Y-%m-%d')
+        plan = planes_por_fecha.get(clave)
+        dias.append((dia, plan))
+
+    return render_template("clientes/semana.html", semana=semana, dias=dias, cliente_email=cliente_email, safe_id=safe_id)
+
+@bp.route("/<cliente_email>/semana/<safe_id>/editar/<fecha>", methods=["GET", "POST"])
+@login_required
+def editar_dia(cliente_email, safe_id, fecha):
+    oid = sirope.oid_from_safe(safe_id)
+    semana = srp.load(oid)
+
+    if not semana or semana.cliente_email != cliente_email:
+        flash("Semana no encontrada.")
+        return redirect(url_for("cliente.dashboard_cliente", cliente_email=cliente_email))
+
+    fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+
+    # Buscar si ya existe un plan para ese día
+    plan_existente = srp.find_first(PlanAlimenticioDiario, lambda p: p.id_semana == oid and p.fecha == fecha_obj)
+
+    if request.method == "POST":
+        estado = request.form["estado"]
+        notas = request.form["notas"]
+        comidas = {}
+        for comida in ["desayuno", "comida", "merienda", "cena", "snacks"]:
+            comidas[comida] = {
+                "descripcion": request.form[f"{comida}_desc"],
+                "calorias": int(request.form[f"{comida}_cal"]),
+                "proteinas": int(request.form[f"{comida}_prot"]),
+                "hidratos": int(request.form[f"{comida}_hidr"]),
+                "grasas": int(request.form[f"{comida}_gras"])
+            }
+
+        plan = plan_existente or PlanAlimenticioDiario(oid, fecha_obj, estado, notas, comidas)
+
+        # Si es nuevo, guardar. Si ya existía, actualizar campos.
+        if plan_existente:
+            plan.estado = estado
+            plan.notas = notas
+            plan.comidas = comidas
+        else:
+            srp.save(plan)
+
+        return redirect(url_for("cliente.ver_semana", cliente_email=cliente_email, safe_id=safe_id))
+
+    return render_template("clientes/plan_diario.html", cliente_email=cliente_email, semana=semana,
+                           fecha=fecha_obj, plan=plan_existente, safe_id=safe_id)

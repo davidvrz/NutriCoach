@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Semana de {{ semana.fecha_inicio.strftime("%d/%m") }} a {{ semana.fecha_fin.strftime("%d/%m") }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Semana de seguimiento</h1>
+        <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">← Volver</a>
+        <ul>
+            {% for fecha, plan in dias %}
+            <li>
+                <strong>{{ fecha.strftime("%A %d/%m") }}</strong><br>
+                {% if plan %}
+                Estado: {{ plan.estado }} –
+                <a
+                    href="{{ url_for('cliente.editar_dia', cliente_email=cliente_email, safe_id=safe_id, fecha=fecha.strftime('%Y-%m-%d')) }}">Ver
+                    / Editar</a>
+                {% else %}
+                <a
+                    href="{{ url_for('cliente.editar_dia', cliente_email=cliente_email, safe_id=safe_id, fecha=fecha.strftime('%Y-%m-%d')) }}">+
+                    Añadir plan</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+
+</html>
