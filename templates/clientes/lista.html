@@ -12,9 +12,14 @@
         <h1>Mis Clientes</h1>
         <ul>
             {% for c in clientes %}
-            <li>{{ c.nombre }} – {{ c.objetivo }}</li>
+            <li>
+                <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=c.email) }}">
+                    {{ c.nombre }} – {{ c.objetivo }}
+                </a>
+            </li>
             {% endfor %}
         </ul>
+
         <a href="{{ url_for('cliente.nuevo_cliente') }}">Añadir nuevo cliente</a>
     </div>
 </body>

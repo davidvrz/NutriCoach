@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva semana - {{ cliente.nombre }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Nueva semana para {{ cliente.nombre }}</h1>
+        <form method="post">
+            <input type="text" name="estado" placeholder="Estado actual" required>
+            <textarea name="notas" placeholder="Notas de la semana..." required></textarea>
+            <input type="number" name="calorias" placeholder="Calorías" value="{{ objetivos.calorias }}" required>
+            <input type="number" name="proteinas" placeholder="Proteínas (g)" value="{{ objetivos.proteinas }}"
+                required>
+            <input type="number" name="hidratos" placeholder="Hidratos (g)" value="{{ objetivos.hidratos }}" required>
+            <input type="number" name="grasas" placeholder="Grasas (g)" value="{{ objetivos.grasas }}" required>
+            <button type="submit">Crear semana</button>
+        </form>
+        <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">← Volver al dashboard</a>
+    </div>
+</body>
+
+</html>

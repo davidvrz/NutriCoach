@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard {{ cliente.nombre }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Seguimiento de {{ cliente.nombre }}</h1>
+        <a href="{{ url_for('cliente.lista_clientes') }}">← Volver</a>
+        <h2>Semanas</h2>
+        <ul>
+            {% for semana in semanas %}
+            <li>
+                {{ semana.fecha_inicio }} - {{ semana.fecha_fin }}<br>
+                Estado: {{ semana.estado_general }}<br>
+                Objetivos: {{ semana.objetivos.calorias }} kcal
+            </li>
+            {% else %}
+            <li>No hay semanas aún.</li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('cliente.nueva_semana', cliente_email=cliente.email) }}">+ Crear nueva semana</a>
+    </div>
+</body>
+
+</html>
