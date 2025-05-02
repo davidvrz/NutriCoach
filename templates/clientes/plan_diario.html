@@ -1,39 +1,121 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Editar día {{ fecha.strftime("%A %d/%m") }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+{% block title %}Día {{ fecha.strftime("%A %d/%m") }} - NutriCoach{% endblock %}
 
-<body>
-    <div class="container">
-        <h1>Día {{ fecha.strftime("%A %d/%m") }}</h1>
-        <form method="post">
-            <input type="text" name="estado" placeholder="Estado del día" value="{{ plan.estado if plan else '' }}"
-                required>
-            <textarea name="notas" placeholder="Notas...">{{ plan.notas if plan else '' }}</textarea>
+{% block navigation %}
+<li><a href="{{ url_for('cliente.lista_clientes') }}">Mis Clientes</a></li>
+<li><a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">Dashboard Cliente</a></li>
+<li><a href="{{ url_for('cliente.ver_semana', cliente_email=cliente_email, safe_id=safe_id) }}">Semana</a></li>
+{% endblock %}
 
-            {% for comida in ["desayuno", "comida", "merienda", "cena", "snacks"] %}
-            <h3>{{ comida.capitalize() }}</h3>
-            <input type="text" name="{{ comida }}_desc" placeholder="Descripción"
-                value="{{ plan.comidas[comida].descripcion if plan and plan.comidas.get(comida) else '' }}">
-            <input type="number" name="{{ comida }}_cal" placeholder="Calorías"
-                value="{{ plan.comidas[comida].calorias if plan and plan.comidas.get(comida) else '' }}">
-            <input type="number" name="{{ comida }}_prot" placeholder="Proteínas (g)"
-                value="{{ plan.comidas[comida].proteinas if plan and plan.comidas.get(comida) else '' }}">
-            <input type="number" name="{{ comida }}_hidr" placeholder="Hidratos (g)"
-                value="{{ plan.comidas[comida].hidratos if plan and plan.comidas.get(comida) else '' }}">
-            <input type="number" name="{{ comida }}_gras" placeholder="Grasas (g)"
-                value="{{ plan.comidas[comida].grasas if plan and plan.comidas.get(comida) else '' }}">
-            {% endfor %}
-
-            <button type="submit">Guardar</button>
-        </form>
-        <a href="{{ url_for('cliente.ver_semana', cliente_email=cliente_email, safe_id=safe_id) }}">← Volver a la
-            semana</a>
+{% block content %}
+<div class="secondary-nav">
+    <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
+        <span class="breadcrumb-item"><a
+                href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">Dashboard
+                Cliente</a></span>
+        <span class="breadcrumb-item"><a
+                href="{{ url_for('cliente.ver_semana', cliente_email=cliente_email, safe_id=safe_id) }}">Semana</a></span>
+        <span class="breadcrumb-item">Día {{ fecha.strftime("%A %d/%m") }}</span>
     </div>
-</body>
+</div>
 
-</html>
+<h1>Plan alimenticio: {{ fecha.strftime("%A %d/%m/%Y") }}</h1>
+
+<div class="card">
+    <form method="post">
+        <div class="form-group">
+            <label for="estado">Estado del día:</label>
+            <input type="text" id="estado" name="estado" placeholder="Estado del día"
+                value="{{ plan.estado if plan else '' }}" required minlength="3">
+        </div>
+
+        <div class="form-group">
+            <label for="notas">Notas del día:</label>
+            <textarea id="notas" name="notas" placeholder="Notas...">{{ plan.notas if plan else '' }}</textarea>
+        </div>
+
+        {% for comida in ["desayuno", "comida", "merienda", "cena", "snacks"] %}
+        <div class="comida-section">
+            <h3>{{ comida.capitalize() }}</h3>
+
+            <div class="comida-details">
+                <div class="form-group">
+                    <label for="{{ comida }}_desc">Descripción:</label>
+                    <input type="text" id="{{ comida }}_desc" name="{{ comida }}_desc" placeholder="Descripción"
+                        value="{{ plan.comidas[comida].descripcion if plan and plan.comidas.get(comida) else '' }}">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ comida }}_cal">Calorías:</label>
+                        <input type="number" id="{{ comida }}_cal" name="{{ comida }}_cal" placeholder="Calorías"
+                            min="0" max="5000"
+                            value="{{ plan.comidas[comida].calorias if plan and plan.comidas.get(comida) else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ comida }}_prot">Proteínas (g):</label>
+                        <input type="number" id="{{ comida }}_prot" name="{{ comida }}_prot" placeholder="Proteínas (g)"
+                            min="0" max="300"
+                            value="{{ plan.comidas[comida].proteinas if plan and plan.comidas.get(comida) else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ comida }}_hidr">Hidratos (g):</label>
+                        <input type="number" id="{{ comida }}_hidr" name="{{ comida }}_hidr" placeholder="Hidratos (g)"
+                            min="0" max="500"
+                            value="{{ plan.comidas[comida].hidratos if plan and plan.comidas.get(comida) else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ comida }}_gras">Grasas (g):</label>
+                        <input type="number" id="{{ comida }}_gras" name="{{ comida }}_gras" placeholder="Grasas (g)"
+                            min="0" max="300"
+                            value="{{ plan.comidas[comida].grasas if plan and plan.comidas.get(comida) else '' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <button type="submit">Guardar plan</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .comida-section {
+        margin-bottom: 25px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .comida-section h3 {
+        margin-top: 0;
+        color: var(--primary-color);
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+</style>
+{% endblock %}

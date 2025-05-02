@@ -1,34 +1,460 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Semana de {{ semana.fecha_inicio.strftime("%d/%m") }} a {{ semana.fecha_fin.strftime("%d/%m") }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+{% block title %}Semana {{ semana.fecha_inicio.strftime("%d/%m") }} - {{ semana.fecha_fin.strftime("%d/%m") }} -
+NutriCoach{% endblock %}
 
-<body>
-    <div class="container">
-        <h1>Semana de seguimiento</h1>
-        <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">← Volver</a>
-        <ul>
-            {% for fecha, plan in dias %}
-            <li>
-                <strong>{{ fecha.strftime("%A %d/%m") }}</strong><br>
-                {% if plan %}
-                Estado: {{ plan.estado }} –
-                <a
-                    href="{{ url_for('cliente.editar_dia', cliente_email=cliente_email, safe_id=safe_id, fecha=fecha.strftime('%Y-%m-%d')) }}">Ver
-                    / Editar</a>
-                {% else %}
-                <a
-                    href="{{ url_for('cliente.editar_dia', cliente_email=cliente_email, safe_id=safe_id, fecha=fecha.strftime('%Y-%m-%d')) }}">+
-                    Añadir plan</a>
-                {% endif %}
-            </li>
-            {% endfor %}
-        </ul>
+{% block navigation %}
+<li><a href="{{ url_for('cliente.lista_clientes') }}">Mis Clientes</a></li>
+<li><a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">Dashboard Cliente</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="secondary-nav">
+    <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
+        <span class="breadcrumb-item"><a
+                href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">Dashboard
+                Cliente</a></span>
+        <span class="breadcrumb-item">Semana {{ semana.fecha_inicio.strftime("%d/%m") }} - {{
+            semana.fecha_fin.strftime("%d/%m") }}</span>
     </div>
-</body>
+</div>
 
-</html>
+<div class="semana-header">
+    <div class="semana-titulo">
+        <h1>Semana de seguimiento</h1>
+        <h2>{{ semana.fecha_inicio.strftime("%d/%m/%Y") }} - {{ semana.fecha_fin.strftime("%d/%m/%Y") }}</h2>
+    </div>
+    <div class="semana-nav">
+        <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}" class="btn-secundario">
+            ← Volver al dashboard
+        </a>
+    </div>
+</div>
+
+<div class="semana-info-card">
+    <div class="card-header">
+        <h3>Información general</h3>
+    </div>
+    <div class="card-body">
+        <div class="info-row">
+            <div class="info-label">Estado general:</div>
+            <div class="info-value">{{ semana.estado_general }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Notas:</div>
+            <div class="info-value">{{ semana.notas }}</div>
+        </div>
+        <div class="objetivos-section">
+            <h4>Objetivos nutricionales</h4>
+            <div class="objetivos-grid">
+                <div class="objetivo-item">
+                    <span class="objetivo-valor">{{ semana.objetivos.calorias }}</span>
+                    <span class="objetivo-label">kcal</span>
+                </div>
+                <div class="objetivo-item">
+                    <span class="objetivo-valor">{{ semana.objetivos.proteinas }}</span>
+                    <span class="objetivo-label">g proteínas</span>
+                </div>
+                <div class="objetivo-item">
+                    <span class="objetivo-valor">{{ semana.objetivos.hidratos }}</span>
+                    <span class="objetivo-label">g hidratos</span>
+                </div>
+                <div class="objetivo-item">
+                    <span class="objetivo-valor">{{ semana.objetivos.grasas }}</span>
+                    <span class="objetivo-label">g grasas</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="planes-diarios-section">
+    <h3>Planes alimenticios diarios</h3>
+
+    <div class="dias-grid">
+        {% set dias = semana|get_dias_semana %}
+        {% for fecha, plan in dias %}
+        <div class="dia-card" id="dia-{{ loop.index }}">
+            <div class="dia-header" onclick="toggleDia('dia-{{ loop.index }}')">
+                <h4>{{ fecha.strftime("%A %d/%m") }}</h4>
+                <div class="dia-estado">
+                    {% if plan %}
+                    <span class="estado-badge">{{ plan.estado }}</span>
+                    {% else %}
+                    <span class="estado-empty">Sin plan</span>
+                    {% endif %}
+                </div>
+                <div class="dia-expand-icon">
+                    <i class="icon-expand">⌄</i>
+                </div>
+            </div>
+
+            <div class="dia-content">
+                {% if plan %}
+                <div class="dia-detalles">
+                    <div class="dia-notas">
+                        <h5>Notas del día:</h5>
+                        <p>{{ plan.notas if plan.notas else "Sin notas" }}</p>
+                    </div>
+
+                    {% if plan.comidas %}
+                    <div class="comidas-container">
+                        {% for comida_nombre, comida in plan.comidas.items() %}
+                        <div class="comida-item">
+                            <div class="comida-header">
+                                <h6>{{ comida_nombre|capitalize }}</h6>
+                            </div>
+                            <div class="comida-body">
+                                <p class="comida-desc">{{ comida.descripcion }}</p>
+                                <div class="comida-nutrientes">
+                                    <span class="nutriente">{{ comida.calorias }} kcal</span>
+                                    <span class="nutriente">{{ comida.proteinas }}g prot</span>
+                                    <span class="nutriente">{{ comida.hidratos }}g HC</span>
+                                    <span class="nutriente">{{ comida.grasas }}g grasas</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="no-comidas">No hay comidas registradas para este día.</p>
+                    {% endif %}
+                </div>
+
+                <div class="dia-actions">
+                    <a href="{{ url_for('cliente.editar_dia', cliente_email=cliente_email, safe_id=safe_id, fecha=fecha.strftime('%Y-%m-%d')) }}"
+                        class="btn-editar">
+                        Editar plan
+                    </a>
+                </div>
+                {% else %}
+                <div class="dia-empty">
+                    <p>Aún no has creado un plan para este día.</p>
+                    <a href="{{ url_for('cliente.editar_dia', cliente_email=cliente_email, safe_id=safe_id, fecha=fecha.strftime('%Y-%m-%d')) }}"
+                        class="btn-primary">
+                        + Crear plan alimenticio
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .semana-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .semana-titulo h1 {
+        margin-bottom: 5px;
+    }
+
+    .semana-titulo h2 {
+        margin-top: 0;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .semana-nav {
+        margin-top: 10px;
+    }
+
+    .btn-secundario {
+        background-color: #6c757d;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .btn-secundario:hover {
+        background-color: #5a6268;
+        text-decoration: none;
+        color: white;
+    }
+
+    .semana-info-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .card-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px 20px;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .info-row {
+        margin-bottom: 15px;
+    }
+
+    .info-label {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .objetivos-section h4 {
+        margin-bottom: 15px;
+        color: var(--primary-color);
+        border-bottom: 1px solid #eee;
+        padding-bottom: 8px;
+    }
+
+    .objetivos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .objetivo-item {
+        background-color: #f5f5f5;
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .objetivo-valor {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        display: block;
+    }
+
+    .objetivo-label {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .planes-diarios-section {
+        margin-top: 30px;
+    }
+
+    .planes-diarios-section h3 {
+        margin-bottom: 20px;
+        color: var(--primary-color);
+    }
+
+    .dias-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .dia-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .dia-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        background-color: #f5f5f5;
+        cursor: pointer;
+        border-left: 4px solid var(--accent-color);
+    }
+
+    .dia-header h4 {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .dia-estado {
+        display: flex;
+        align-items: center;
+    }
+
+    .estado-badge {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    .estado-empty {
+        color: #999;
+        font-style: italic;
+        font-size: 0.8rem;
+    }
+
+    .dia-expand-icon {
+        font-size: 1.3rem;
+        transition: transform 0.3s ease;
+    }
+
+    .dia-card.active .dia-expand-icon {
+        transform: rotate(180deg);
+    }
+
+    .dia-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .dia-card.active .dia-content {
+        max-height: 1000px;
+        padding: 15px;
+    }
+
+    .dia-detalles {
+        margin-bottom: 15px;
+    }
+
+    .dia-notas {
+        margin-bottom: 20px;
+    }
+
+    .dia-notas h5 {
+        margin: 0 0 5px 0;
+        color: var(--primary-color);
+        font-size: 0.9rem;
+    }
+
+    .comidas-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+    }
+
+    .comida-item {
+        background-color: #f9f9f9;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+
+    .comida-header {
+        background-color: var(--primary-light);
+        padding: 8px 12px;
+    }
+
+    .comida-header h6 {
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .comida-body {
+        padding: 10px;
+    }
+
+    .comida-desc {
+        margin: 0 0 8px 0;
+        font-size: 0.9rem;
+    }
+
+    .comida-nutrientes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .nutriente {
+        background-color: #e9ecef;
+        padding: 3px 6px;
+        border-radius: 3px;
+        font-size: 0.8rem;
+    }
+
+    .dia-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .dia-empty {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+
+    .dia-empty p {
+        margin-bottom: 15px;
+    }
+
+    .btn-editar {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-editar:hover,
+    .btn-primary:hover {
+        opacity: 0.9;
+        text-decoration: none;
+        color: white;
+    }
+
+    .no-comidas {
+        color: #999;
+        font-style: italic;
+        text-align: center;
+        padding: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleDia(id) {
+        const card = document.getElementById(id);
+        if (card.classList.contains('active')) {
+            card.classList.remove('active');
+        } else {
+            card.classList.add('active');
+        }
+    }
+
+    // Activar el primer día por defecto para mostrar su contenido
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date().getDay();
+        const dias = document.querySelectorAll('.dia-card');
+
+        if (dias.length > 0) {
+            // Si hay 7 días, intentamos mostrar el día actual
+            if (dias.length === 7 && today < 7) {
+                dias[today].classList.add('active');
+            } else {
+                // Si no, mostrar el primer día
+                dias[0].classList.add('active');
+            }
+        }
+    });
+</script>
+{% endblock %}

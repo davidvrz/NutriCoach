@@ -1,27 +1,40 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Nueva semana - {{ cliente.nombre }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+{% block title %}Nueva semana - {{ cliente.nombre }} - NutriCoach{% endblock %}
 
-<body>
-    <div class="container">
-        <h1>Nueva semana para {{ cliente.nombre }}</h1>
-        <form method="post">
-            <input type="text" name="estado" placeholder="Estado actual" required>
-            <textarea name="notas" placeholder="Notas de la semana..." required></textarea>
-            <input type="number" name="calorias" placeholder="Calorías" value="{{ objetivos.calorias }}" required>
-            <input type="number" name="proteinas" placeholder="Proteínas (g)" value="{{ objetivos.proteinas }}"
-                required>
-            <input type="number" name="hidratos" placeholder="Hidratos (g)" value="{{ objetivos.hidratos }}" required>
-            <input type="number" name="grasas" placeholder="Grasas (g)" value="{{ objetivos.grasas }}" required>
-            <button type="submit">Crear semana</button>
-        </form>
-        <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">← Volver al dashboard</a>
+{% block navigation %}
+<li><a href="{{ url_for('cliente.lista_clientes') }}">Mis Clientes</a></li>
+<li><a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">{{ cliente.nombre }}</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="secondary-nav">
+    <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
+        <span class="breadcrumb-item"><a
+                href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">{{ cliente.nombre
+                }}</a></span>
+        <span class="breadcrumb-item">Nueva semana</span>
     </div>
-</body>
+</div>
 
-</html>
+<h1>Nueva semana para {{ cliente.nombre }}</h1>
+
+<div class="card">
+    <form method="post">
+        <input type="text" name="estado" placeholder="Estado actual" required minlength="3">
+        <textarea name="notas" placeholder="Notas de la semana..." required minlength="5"></textarea>
+
+        <h3>Objetivos nutricionales</h3>
+        <input type="number" name="calorias" placeholder="Calorías" value="{{ objetivos.calorias }}" required min="500"
+            max="10000">
+        <input type="number" name="proteinas" placeholder="Proteínas (g)" value="{{ objetivos.proteinas }}" required
+            min="10" max="500">
+        <input type="number" name="hidratos" placeholder="Hidratos (g)" value="{{ objetivos.hidratos }}" required
+            min="10" max="1000">
+        <input type="number" name="grasas" placeholder="Grasas (g)" value="{{ objetivos.grasas }}" required min="5"
+            max="500">
+        <button type="submit">Crear semana</button>
+    </form>
+</div>
+{% endblock %}

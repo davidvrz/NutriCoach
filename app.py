@@ -1,6 +1,7 @@
 from flask import Flask, redirect
-from flask_login import LoginManager, login_required, current_user
+from flask_login import LoginManager
 import sirope
+from datetime import datetime
 
 from models.coach import Coach
 from controllers import auth, cliente 
@@ -18,22 +19,31 @@ def create_app():
     def user_loader(email):
         return srp.find_first(Coach, lambda c: c.email == email)
 
+    # Añadir contexto global para las plantillas
+    @app.context_processor
+    def inject_now():
+        return {
+            'now': datetime.now(),
+            'hasattr': hasattr  # Agregar función hasattr para poder usarla en plantillas
+        }
+
     # Registrar blueprints
     app.register_blueprint(auth.bp)
-    app.register_blueprint(cliente.bp)  # 🔹 Añadido
+    app.register_blueprint(cliente.bp)
+
+    # Rutas simples de redirección
+    @app.route("/")
+    def index():
+        return redirect("/clientes")
+
+    # Mantener la ruta /home por compatibilidad, pero redirige a /clientes
+    @app.route("/home")
+    def home():
+        return redirect("/clientes")
 
     return app
 
 app = create_app()
-
-@app.route("/")
-def index():
-    return redirect("/login")
-
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    return f"Bienvenido, {current_user.nombre}. Esta es tu área de trabajo."
 
 if __name__ == "__main__":
     app.run(debug=True)

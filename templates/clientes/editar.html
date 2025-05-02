@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Editar {{ cliente.nombre }} - NutriCoach{% endblock %}
+
+{% block navigation %}
+<li><a href="{{ url_for('cliente.lista_clientes') }}">Mis Clientes</a></li>
+<li><a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">{{ cliente.nombre }}</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="secondary-nav">
+    <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
+        <span class="breadcrumb-item"><a
+                href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">{{ cliente.nombre
+                }}</a></span>
+        <span class="breadcrumb-item">Editar</span>
+    </div>
+</div>
+
+<h1>Editar Cliente</h1>
+
+<div class="card">
+    <form method="post">
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" value="{{ cliente.nombre }}" required minlength="2"
+                maxlength="50">
+        </div>
+
+        <div class="form-group">
+            <label for="edad">Edad:</label>
+            <input type="number" id="edad" name="edad" value="{{ cliente.edad }}" required min="1" max="120">
+        </div>
+
+        <div class="form-group">
+            <label for="peso">Peso (kg):</label>
+            <input type="number" id="peso" name="peso" step="0.1" value="{{ cliente.peso }}" required min="10"
+                max="500">
+        </div>
+
+        <div class="form-group">
+            <label for="altura">Altura (cm):</label>
+            <input type="number" id="altura" name="altura" step="0.1" value="{{ cliente.altura }}" required min="50"
+                max="300">
+        </div>
+
+        <div class="form-group">
+            <label for="objetivo">Objetivo:</label>
+            <input type="text" id="objetivo" name="objetivo" value="{{ cliente.objetivo }}" required minlength="3">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit">Guardar cambios</button>
+            <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}"
+                class="btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        padding: 12px 15px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 16px;
+        display: inline-block;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        text-decoration: none;
+        color: white;
+    }
+</style>
+{% endblock %}

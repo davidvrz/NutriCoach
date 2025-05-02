@@ -1,27 +1,31 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Clientes</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+{% block title %}Mis Clientes - NutriCoach{% endblock %}
 
-<body>
-    <div class="container">
-        <h1>Mis Clientes</h1>
-        <ul>
-            {% for c in clientes %}
-            <li>
-                <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=c.email) }}">
-                    {{ c.nombre }} – {{ c.objetivo }}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
+{% block navigation %}
+{# No necesitamos enlaces de navegación aquí porque ya estamos en la página principal #}
+{% endblock %}
 
-        <a href="{{ url_for('cliente.nuevo_cliente') }}">Añadir nuevo cliente</a>
-    </div>
-</body>
+{% block content %}
+<h1>Mis Clientes</h1>
 
-</html>
+{% if clientes %}
+<ul class="cliente-list">
+    {% for c in clientes %}
+    <li class="cliente-item">
+        <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=c.email) }}">
+            {{ c.nombre }}
+        </a>
+        <a href="{{ url_for('cliente.eliminar_cliente', cliente_email=c.email) }}" class="eliminar-btn"
+            onclick="return confirm('¿Estás seguro de que deseas eliminar a este cliente y todos sus datos? Esta acción no se puede deshacer.')">
+            Eliminar
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Aún no tienes ningún cliente registrado.</p>
+{% endif %}
+
+<a href="{{ url_for('cliente.nuevo_cliente') }}" class="btn-primary">Añadir nuevo cliente</a>
+{% endblock %}

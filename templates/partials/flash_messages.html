@@ -1,0 +1,9 @@
+{% if get_flashed_messages(category_filter=["error"]) %}
+<div class="flash-messages">
+    {% for message in get_flashed_messages(category_filter=["error"]) %}
+    <div class="flash-message flash-error">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NutriCoach{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="navbar-logo">
+            <a href="{{ url_for('home') }}">NutriCoach</a>
+        </div>
+        {% if current_user.is_authenticated %}
+        <nav class="navbar-nav">
+            <ul>
+                <li><a href="{{ url_for('cliente.lista_clientes') }}">Mis Clientes</a></li>
+                {% block navigation %}
+                {% endblock %}
+            </ul>
+        </nav>
+        <div class="navbar-user">
+            <span>{{ current_user.nombre }}</span>
+            <a href="{{ url_for('auth.logout') }}" class="btn-logout">Cerrar Sesión</a>
+        </div>
+        {% endif %}
+    </header>
+
+    <main class="content">
+        <div class="container">
+            {% include 'partials/flash_messages.html' %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; {{ now.year }} NutriCoach - Aplicación para nutricionistas</p>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
