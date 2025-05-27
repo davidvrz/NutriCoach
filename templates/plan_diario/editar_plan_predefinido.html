@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Plan Predefinido - NutriCoach{% endblock %}
+
+{% block content %}
+<div class="secondary-nav">
+    <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
+        <span class="breadcrumb-item"><a href="{{ url_for('plan.lista_planes_predefinidos') }}">Planes
+                Predefinidos</a></span>
+        <span class="breadcrumb-item">Editar Plan</span>
+    </div>
+</div>
+
+<h1>Editar Plan Alimenticio Predefinido</h1>
+
+<div class="card">
+    <form method="post">
+        <div class="form-group">
+            <label for="nombre">Nombre del plan:</label>
+            <input type="text" id="nombre" name="nombre" value="{{ plan.nombre }}" required minlength="3">
+        </div>
+
+        <div class="form-group">
+            <label for="descripcion">Descripción:</label>
+            <textarea id="descripcion" name="descripcion">{{ plan.descripcion }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="tipo">Tipo de plan:</label>
+            <select id="tipo" name="tipo" required>
+                <option value="general" {% if plan.tipo=='general' %}selected{% endif %}>General</option>
+                <option value="volumen" {% if plan.tipo=='volumen' %}selected{% endif %}>Volumen</option>
+                <option value="mantenimiento" {% if plan.tipo=='mantenimiento' %}selected{% endif %}>Mantenimiento
+                </option>
+                <option value="definición" {% if plan.tipo=='definición' %}selected{% endif %}>Definición</option>
+            </select>
+        </div>
+
+        <h2>Comidas</h2>
+        <p class="form-helper">Edita los valores o añade nuevas comidas a este plan.</p>
+
+        {% for comida in ["desayuno", "comida", "merienda", "cena", "snacks"] %}
+        <div class="comida-section">
+            <h3>{{ comida|capitalize }}</h3>
+
+            <div class="comida-details">
+                <div class="form-group">
+                    <label for="{{ comida }}_desc">Descripción:</label>
+                    <input type="text" id="{{ comida }}_desc" name="{{ comida }}_desc" placeholder="Descripción"
+                        value="{{ plan.comidas[comida].descripcion if plan.comidas.get(comida) else '' }}">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ comida }}_cal">Calorías:</label>
+                        <input type="number" id="{{ comida }}_cal" name="{{ comida }}_cal" placeholder="Calorías"
+                            min="0" max="5000"
+                            value="{{ plan.comidas[comida].calorias if plan.comidas.get(comida) else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ comida }}_prot">Proteínas (g):</label>
+                        <input type="number" id="{{ comida }}_prot" name="{{ comida }}_prot" placeholder="Proteínas (g)"
+                            min="0" max="300"
+                            value="{{ plan.comidas[comida].proteinas if plan.comidas.get(comida) else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ comida }}_hidr">Hidratos (g):</label>
+                        <input type="number" id="{{ comida }}_hidr" name="{{ comida }}_hidr" placeholder="Hidratos (g)"
+                            min="0" max="500"
+                            value="{{ plan.comidas[comida].hidratos if plan.comidas.get(comida) else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ comida }}_gras">Grasas (g):</label>
+                        <input type="number" id="{{ comida }}_gras" name="{{ comida }}_gras" placeholder="Grasas (g)"
+                            min="0" max="300"
+                            value="{{ plan.comidas[comida].grasas if plan.comidas.get(comida) else '' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Guardar Cambios</button>
+            <a href="{{ url_for('plan.lista_planes_predefinidos') }}" class="btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .comida-section {
+        margin-bottom: 25px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .comida-section h3 {
+        margin-top: 0;
+        color: var(--primary-color);
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .form-helper {
+        color: #666;
+        font-style: italic;
+        margin-bottom: 20px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        padding: 12px 15px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 16px;
+        display: inline-block;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        text-decoration: none;
+        color: white;
+    }
+</style>
+{% endblock %}

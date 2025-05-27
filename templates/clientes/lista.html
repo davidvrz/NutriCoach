@@ -15,9 +15,8 @@
     <li class="cliente-item">
         <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=c.email) }}">
             {{ c.nombre }}
-        </a>
-        <a href="{{ url_for('cliente.eliminar_cliente', cliente_email=c.email) }}" class="eliminar-btn"
-            onclick="return confirm('¿Estás seguro de que deseas eliminar a este cliente y todos sus datos? Esta acción no se puede deshacer.')">
+        </a> <a href="{{ url_for('cliente.eliminar_cliente', cliente_email=c.email) }}" class="eliminar-btn"
+            data-confirm="¿Estás seguro de que deseas eliminar a este cliente y todos sus datos? Esta acción no se puede deshacer.">
             Eliminar
         </a>
     </li>

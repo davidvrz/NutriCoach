@@ -47,7 +47,18 @@
 
         <div class="form-group">
             <label for="objetivo">Objetivo:</label>
-            <input type="text" id="objetivo" name="objetivo" value="{{ cliente.objetivo }}" required minlength="3">
+            <select id="objetivo" name="objetivo" required>
+                <option value="Volumen" {% if cliente.objetivo=='Volumen' %}selected{% endif %}>Volumen</option>
+                <option value="Mantenimiento" {% if cliente.objetivo=='Mantenimiento' %}selected{% endif %}>
+                    Mantenimiento</option>
+                <option value="Definición" {% if cliente.objetivo=='Definición' %}selected{% endif %}>Definición
+                </option>
+                <option value="{{ cliente.objetivo }}" {% if cliente.objetivo not in ['Volumen', 'Mantenimiento'
+                    , 'Definición' ] %}selected{% endif %} {% if cliente.objetivo in ['Volumen', 'Mantenimiento'
+                    , 'Definición' ] %}hidden{% endif %}>
+                    {{ cliente.objetivo }}
+                </option>
+            </select>
         </div>
 
         <div class="form-actions">
@@ -69,6 +80,15 @@
         display: block;
         margin-bottom: 5px;
         font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
     }
 
     .form-actions {

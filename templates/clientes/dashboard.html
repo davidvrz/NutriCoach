@@ -12,6 +12,12 @@
 
 <h1>Seguimiento de {{ cliente.nombre }}</h1>
 
+<div class="dashboard-actions">
+    <a href="{{ url_for('plan.lista_planes_predefinidos') }}" class="btn-secondary">
+        <i class="icon-template"></i> Planes predefinidos
+    </a>
+</div>
+
 <div class="card">
     <div class="cliente-header">
         <h2 class="card-title">Información del cliente</h2>
@@ -28,90 +34,42 @@
     <h2>Cronograma de semanas nutricionales</h2>
 
     <div class="timeline-actions">
-        <a href="{{ url_for('cliente.nueva_semana', cliente_email=cliente.email) }}" class="btn-primary">+ Crear nueva
+        <a href="{{ url_for('semana.nueva_semana', cliente_email=cliente.email) }}" class="btn-primary">+ Crear nueva
             semana</a>
     </div>
 
     {% if semanas %}
-    <div class="timeline-container">
-        {% for s in semanas %}
-        {% set semana = s.semana %}
-        {% set safe_id = s.safe_id %}
-        <div class="timeline-card" id="semana-{{ loop.index }}">
-            <div class="timeline-card-header" onclick="toggleSemana('semana-{{ loop.index }}')">
-                <div class="timeline-date">{{ semana.fecha_inicio.strftime("%d/%m/%Y") }} - {{
-                    semana.fecha_fin.strftime("%d/%m/%Y") }}</div>
-                <div class="timeline-estado">{{ semana.estado_general }}</div>
-                <div class="timeline-expand-icon">
-                    <i class="icon-expand">⌄</i>
+    <div class="timeline-wrapper">
+        <div class="timeline-line"></div>
+        <div class="timeline-container">
+            {% for s in semanas %}
+            {% set semana = s.semana %}
+            {% set safe_id = s.safe_id %}
+            {% set index = loop.index %}
+            {% set today = now.date() %}
+            {% set is_current = semana.fecha_inicio <= today and today <=semana.fecha_fin %} <div
+                class="timeline-card {% if is_current %}current{% endif %}">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card-header">
+                    <div class="timeline-date">{{ semana.fecha_inicio.strftime("%d/%m") }} - {{
+                        semana.fecha_fin.strftime("%d/%m") }}</div>
+                    <div class="timeline-estado">{{ semana.estado_general }}</div>
                 </div>
-            </div>
-            <div class="timeline-card-content">
-                <div class="timeline-card-info">
-                    <p><strong>Estado:</strong> {{ semana.estado_general }}</p>
-                    <p><strong>Notas:</strong> {{ semana.notas }}</p>
-                    <div class="objetivos-nutricionales">
-                        <h4>Objetivos nutricionales:</h4>
-                        <div class="objetivos-grid">
-                            <div class="objetivo-item">
-                                <span class="objetivo-valor">{{ semana.objetivos.calorias }}</span>
-                                <span class="objetivo-label">kcal</span>
-                            </div>
-                            <div class="objetivo-item">
-                                <span class="objetivo-valor">{{ semana.objetivos.proteinas }}</span>
-                                <span class="objetivo-label">g proteínas</span>
-                            </div>
-                            <div class="objetivo-item">
-                                <span class="objetivo-valor">{{ semana.objetivos.hidratos }}</span>
-                                <span class="objetivo-label">g hidratos</span>
-                            </div>
-                            <div class="objetivo-item">
-                                <span class="objetivo-valor">{{ semana.objetivos.grasas }}</span>
-                                <span class="objetivo-label">g grasas</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-card-planes">
-                    <h4>Planes alimenticios diarios</h4>
-
-                    <div class="planes-grid">
-                        {% set dias = semana|get_dias_semana %}
-                        {% for dia_fecha, plan in dias %}
-                        <div class="plan-dia-card">
-                            <div class="plan-dia-header">
-                                <h5>{{ dia_fecha.strftime("%A %d/%m") }}</h5>
-                            </div>
-                            <div class="plan-dia-body">
-                                {% if plan %}
-                                <div class="plan-dia-estado">Estado: {{ plan.estado }}</div>
-                                <a href="{{ url_for('cliente.editar_dia', cliente_email=cliente.email, safe_id=safe_id, fecha=dia_fecha.strftime('%Y-%m-%d')) }}"
-                                    class="btn-editar-small">Ver / Editar</a>
-                                {% else %}
-                                <div class="plan-dia-empty">Sin plan</div>
-                                <a href="{{ url_for('cliente.editar_dia', cliente_email=cliente.email, safe_id=safe_id, fecha=dia_fecha.strftime('%Y-%m-%d')) }}"
-                                    class="btn-primary-small">+ Añadir plan</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-
+                <div class="timeline-card-content">
                     <div class="timeline-card-actions">
-                        <a href="{{ url_for('cliente.ver_semana', cliente_email=cliente.email, safe_id=safe_id) }}"
+                        <a href="{{ url_for('semana.ver_semana', cliente_email=cliente.email, safe_id=safe_id) }}"
                             class="btn-ver-semana">Ver semana completa</a>
                     </div>
                 </div>
-            </div>
         </div>
         {% endfor %}
     </div>
-    {% else %}
-    <div class="timeline-empty">
-        <p>No hay semanas de seguimiento aún. Crea una nueva semana para comenzar el seguimiento nutricional.</p>
-    </div>
-    {% endif %}
+</div>
+{% else %}
+<div class="timeline-empty">
+    <p>No hay semanas de seguimiento aún. Crea una nueva semana para comenzar el seguimiento nutricional.</p>
+</div>
+{% endif %}
 </div>
 {% endblock %}
 
@@ -135,8 +93,6 @@
 
     .btn-editar:hover {
         background-color: #0288d1;
-        text-decoration: none;
-        color: white;
     }
 
     /* Timeline de semanas */
@@ -149,14 +105,50 @@
         color: var(--primary-color);
     }
 
-    .timeline-actions {
+    .timeline-wrapper {
+        position: relative;
+        padding: 50px 0 30px;
+        /* Aumentado el margen superior */
+        overflow-x: auto;
         margin-bottom: 20px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-color) #f0f0f0;
+    }
+
+    .timeline-wrapper::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .timeline-wrapper::-webkit-scrollbar-track {
+        background: #f0f0f0;
+        border-radius: 10px;
+    }
+
+    .timeline-wrapper::-webkit-scrollbar-thumb {
+        background-color: var(--primary-color);
+        border-radius: 10px;
+        border: 2px solid #f0f0f0;
+    }
+
+    .timeline-line {
+        position: absolute;
+        top: 100px;
+        /* Aumentado para dar más espacio */
+        left: 0;
+        height: 4px;
+        background-color: #ddd;
+        width: 100%;
+        z-index: 1;
     }
 
     .timeline-container {
         display: flex;
-        flex-direction: column;
-        gap: 20px;
+        flex-direction: row-reverse;
+        gap: 30px;
+        position: relative;
+        min-width: min-content;
+        padding: 0 15px;
+        width: max-content;
     }
 
     .timeline-card {
@@ -164,160 +156,62 @@
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         overflow: hidden;
-        transition: all 0.3s ease;
+        width: 250px;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .timeline-card.current {
+        width: 280px;
+        border: 3px solid var(--primary-color);
+        /* Borde más grueso del color de la app */
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        /* Sombra con el color de la app */
+    }
+
+    .timeline-dot {
+        position: absolute;
+        top: -25px;
+        /* Ajustado para dar más espacio */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 16px;
+        height: 16px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        border: 3px solid white;
     }
 
     .timeline-card-header {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
         align-items: center;
         padding: 15px 20px;
         background-color: #f9f9f9;
-        cursor: pointer;
-        border-left: 4px solid var(--primary-color);
+        border-bottom: 1px solid #eee;
+        position: relative;
     }
 
     .timeline-date {
         font-weight: 600;
-        font-size: 1.1rem;
+        font-size: 1rem;
+        margin-bottom: 5px;
+        text-align: center;
     }
 
     .timeline-estado {
         color: #666;
-    }
-
-    .timeline-expand-icon {
-        font-size: 1.5rem;
-        transition: transform 0.3s ease;
-    }
-
-    .timeline-card.active .timeline-expand-icon {
-        transform: rotate(180deg);
+        font-size: 0.9rem;
+        text-align: center;
     }
 
     .timeline-card-content {
-        padding: 0;
-        max-height: 0;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .timeline-card.active .timeline-card-content {
-        padding: 20px;
-        max-height: 2000px;
-    }
-
-    .timeline-card-info {
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
-    }
-
-    .objetivos-nutricionales h4 {
-        margin: 15px 0 10px;
-        color: var(--primary-color);
-    }
-
-    .objetivos-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 15px;
-        margin-top: 10px;
-    }
-
-    .objetivo-item {
-        background-color: #f5f5f5;
-        border-radius: 8px;
-        padding: 10px;
+        padding: 15px;
         text-align: center;
-    }
-
-    .objetivo-valor {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: var(--primary-color);
-        display: block;
-    }
-
-    .objetivo-label {
-        font-size: 0.8rem;
-        color: #666;
-    }
-
-    /* Planes diarios */
-    .timeline-card-planes h4 {
-        margin: 0 0 15px;
-        color: var(--primary-color);
-    }
-
-    .planes-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
-    }
-
-    .plan-dia-card {
-        background-color: #f9f9f9;
-        border-radius: 6px;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .plan-dia-header {
-        background-color: var(--primary-light);
-        padding: 8px 12px;
-    }
-
-    .plan-dia-header h5 {
-        margin: 0;
-        font-size: 0.9rem;
-    }
-
-    .plan-dia-body {
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .plan-dia-estado {
-        font-size: 0.9rem;
-    }
-
-    .plan-dia-empty {
-        font-size: 0.9rem;
-        color: #999;
-        font-style: italic;
-    }
-
-    .btn-editar-small,
-    .btn-primary-small {
-        font-size: 0.8rem;
-        padding: 5px 10px;
-        text-align: center;
-        border-radius: 4px;
-        text-decoration: none;
-    }
-
-    .btn-editar-small {
-        background-color: var(--accent-color);
-        color: white;
-    }
-
-    .btn-primary-small {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .btn-editar-small:hover,
-    .btn-primary-small:hover {
-        opacity: 0.9;
-        text-decoration: none;
-        color: white;
     }
 
     .timeline-card-actions {
-        margin-top: 20px;
         text-align: center;
     }
 
@@ -328,48 +222,52 @@
         border-radius: 4px;
         text-decoration: none;
         display: inline-block;
+        font-size: 0.9rem;
     }
 
     .btn-ver-semana:hover {
-        background-color: var(--primary-dark);
+        opacity: 0.9;
         text-decoration: none;
         color: white;
     }
 
-    /* Estado vacío */
-    .timeline-empty {
-        background-color: #f9f9f9;
-        padding: 30px;
-        text-align: center;
-        border-radius: 8px;
-        color: #666;
+    .dashboard-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        text-decoration: none;
+        color: white;
+    }
+
+    .icon-template::before {
+        content: "📋";
+        font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+        .timeline-card {
+            width: 200px;
+        }
+
+        .timeline-card.current {
+            width: 230px;
+        }
     }
 </style>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    function toggleSemana(id) {
-        const card = document.getElementById(id);
-        if (card.classList.contains('active')) {
-            card.classList.remove('active');
-        } else {
-            // Cerrar todas las demás cards
-            document.querySelectorAll('.timeline-card.active').forEach(activeCard => {
-                if (activeCard.id !== id) {
-                    activeCard.classList.remove('active');
-                }
-            });
-            card.classList.add('active');
-        }
-    }
-
-    // Abrir la primera semana por defecto (si existe)
-    document.addEventListener('DOMContentLoaded', function () {
-        const firstCard = document.querySelector('.timeline-card');
-        if (firstCard) {
-            firstCard.classList.add('active');
-        }
-    });
-</script>
 {% endblock %}

@@ -1,12 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, flash, url_for, session
+from flask import Blueprint, render_template, request, redirect, flash, url_for, session, g
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-import sirope
 
 from models.coach import Coach
 
 bp = Blueprint("auth", __name__)
-srp = sirope.Sirope()
 
 @bp.route("/register", methods=["GET", "POST"])
 def register():
@@ -38,13 +36,13 @@ def register():
             errors['password'] = "La contraseña debe tener al menos 6 caracteres"
             valid = False
 
-        if srp.find_first(Coach, lambda c: c.email == email):
+        if g.srp.find_first(Coach, lambda c: c.email == email):
             errors['email'] = "Ya existe un coach con ese email"
             valid = False
 
         if valid:
             coach = Coach(email, nombre, generate_password_hash(password))
-            srp.save(coach)
+            g.srp.save(coach)
             login_user(coach)
             return redirect("/clientes")
         else:
@@ -78,7 +76,7 @@ def login():
             valid = False
 
         if valid:
-            coach = srp.find_first(Coach, lambda c: c.email == email)
+            coach = g.srp.find_first(Coach, lambda c: c.email == email)
             if not coach or not check_password_hash(coach.password_hash, password):
                 flash("Credenciales incorrectas", "error")
                 return redirect(url_for("auth.login"))

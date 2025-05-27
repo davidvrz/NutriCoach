@@ -19,11 +19,16 @@
 <div class="card">
     <form method="post">
         <input type="text" name="nombre" placeholder="Nombre" required minlength="2" maxlength="50">
-        <input type="email" name="email" placeholder="Email (opcional)">
+        <input type="email" name="email" placeholder="Email" required minlength="3" maxlength="80">
         <input type="number" name="edad" placeholder="Edad" required min="1" max="120">
         <input type="number" step="0.1" name="peso" placeholder="Peso (kg)" required min="10" max="500">
         <input type="number" step="0.1" name="altura" placeholder="Altura (cm)" required min="50" max="300">
-        <input type="text" name="objetivo" placeholder="Objetivo (p.ej. Volumen)" required minlength="3">
+        <select name="objetivo" required>
+            <option value="" disabled selected>Selecciona un objetivo</option>
+            <option value="Volumen">Volumen</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Definición">Definición</option>
+        </select>
         <button type="submit">Guardar</button>
     </form>
 </div>

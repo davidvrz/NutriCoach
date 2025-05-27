@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Día {{ fecha.strftime("%A %d/%m") }} - NutriCoach{% endblock %}
+
+{% block navigation %}
+<li><a href="{{ url_for('cliente.lista_clientes') }}">Mis Clientes</a></li>
+<li><a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">Dashboard Cliente</a></li>
+<li><a href="{{ url_for('semana.ver_semana', cliente_email=cliente_email, safe_id=safe_id) }}">Semana</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="secondary-nav">
+    <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
+        <span class="breadcrumb-item"><a
+                href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">Dashboard
+                Cliente</a></span>
+        <span class="breadcrumb-item"><a
+                href="{{ url_for('semana.ver_semana', cliente_email=cliente_email, safe_id=safe_id) }}">Semana</a></span>
+        <span class="breadcrumb-item">Día {{ fecha.strftime("%A %d/%m") }}</span>
+    </div>
+</div>
+
+<h1>Plan alimenticio: {{ fecha.strftime("%A %d/%m/%Y") }}</h1>
+
+<div class="card">
+    {% if planes_predefinidos %}
+    <div class="planes-predefinidos-selector">
+        <h3>Seleccionar plan predefinido</h3>
+        <p>Puedes seleccionar un plan predefinido como base para este día.</p>
+
+        <div class="selector-container">
+            <select id="plan_predefinido" name="plan_predefinido">
+                <option value="ninguno">-- Ninguno: plan personalizado --</option>
+                {% for plan_pred in planes_predefinidos %}
+                <option value="{{ plan_pred.safe_id }}">{{ plan_pred.nombre }} ({{ plan_pred.tipo|capitalize }})
+                </option>
+                {% endfor %}
+            </select>
+            <button type="button" id="aplicar-plan" class="btn-primary">Aplicar plan</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post">
+        <div class="form-group">
+            <label for="estado">Estado del día:</label>
+            <input type="text" id="estado" name="estado" placeholder="Estado del día"
+                value="{{ plan.estado if plan else '' }}" required minlength="3">
+        </div>
+
+        <div class="form-group">
+            <label for="notas">Notas del día:</label>
+            <textarea id="notas" name="notas" placeholder="Notas...">{{ plan.notas if plan else '' }}</textarea>
+        </div>
+
+        <!-- Campo oculto para mantener el ID del plan predefinido seleccionado -->
+        <input type="hidden" id="plan_predefinido_id" name="plan_predefinido" value="">
+
+        {% for comida in ["desayuno", "comida", "merienda", "cena", "snacks"] %}
+        <div class="comida-section">
+            <h3>{{ comida.capitalize() }}</h3>
+
+            <div class="comida-details">
+                <div class="form-group">
+                    <label for="{{ comida }}_desc">Descripción:</label>
+                    <input type="text" id="{{ comida }}_desc" name="{{ comida }}_desc" placeholder="Descripción"
+                        value="{{ plan.comidas[comida].descripcion if plan and plan.comidas.get(comida) else '' }}">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ comida }}_cal">Calorías:</label>
+                        <input type="number" id="{{ comida }}_cal" name="{{ comida }}_cal" placeholder="Calorías"
+                            min="0" max="5000"
+                            value="{{ plan.comidas[comida].calorias if plan and plan.comidas.get(comida) else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ comida }}_prot">Proteínas (g):</label>
+                        <input type="number" id="{{ comida }}_prot" name="{{ comida }}_prot" placeholder="Proteínas (g)"
+                            min="0" max="300"
+                            value="{{ plan.comidas[comida].proteinas if plan and plan.comidas.get(comida) else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ comida }}_hidr">Hidratos (g):</label>
+                        <input type="number" id="{{ comida }}_hidr" name="{{ comida }}_hidr" placeholder="Hidratos (g)"
+                            min="0" max="500"
+                            value="{{ plan.comidas[comida].hidratos if plan and plan.comidas.get(comida) else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ comida }}_gras">Grasas (g):</label>
+                        <input type="number" id="{{ comida }}_gras" name="{{ comida }}_gras" placeholder="Grasas (g)"
+                            min="0" max="300"
+                            value="{{ plan.comidas[comida].grasas if plan and plan.comidas.get(comida) else '' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <button type="submit">Guardar plan</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .comida-section {
+        margin-bottom: 25px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .comida-section h3 {
+        margin-top: 0;
+        color: var(--primary-color);
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .planes-predefinidos-selector {
+        margin-bottom: 25px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .planes-predefinidos-selector h3 {
+        margin-top: 0;
+        color: var(--primary-color);
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .selector-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    #plan_predefinido {
+        flex: 1;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Elementos del DOM
+        const selectPlan = document.getElementById('plan_predefinido');
+        const btnAplicar = document.getElementById('aplicar-plan');
+        const planPredefinidoId = document.getElementById('plan_predefinido_id');
+
+        if (btnAplicar) {
+            btnAplicar.addEventListener('click', function () {
+                const selectedValue = selectPlan.value;
+
+                if (selectedValue && selectedValue !== 'ninguno') {
+                    // Guardar el ID del plan seleccionado en el campo oculto
+                    planPredefinidoId.value = selectedValue;
+
+                    // Obtener los datos del plan predefinido mediante AJAX
+                    fetch(`/planes/predefinido/${selectedValue}`)
+                        .then(response => response.json())
+                        .then(plan => {
+                            // Si el plan existe, aplicar sus valores al formulario
+                            if (plan && !plan.error) {
+                                // Para cada comida en el plan predefinido
+                                for (const [comidaNombre, comidaData] of Object.entries(plan.comidas)) {
+                                    // Actualizar la descripción
+                                    const descEl = document.getElementById(`${comidaNombre}_desc`);
+                                    if (descEl) {
+                                        descEl.value = comidaData.descripcion;
+                                    }
+
+                                    // Actualizar valores nutricionales
+                                    const campos = ['cal', 'prot', 'hidr', 'gras'];
+                                    const valores = ['calorias', 'proteinas', 'hidratos', 'grasas'];
+
+                                    for (let i = 0; i < campos.length; i++) {
+                                        const el = document.getElementById(`${comidaNombre}_${campos[i]}`);
+                                        if (el) {
+                                            el.value = comidaData[valores[i]];
+                                        }
+                                    }
+                                }
+
+                                alert(`Plan "${plan.nombre}" aplicado con éxito. Puedes editar los valores antes de guardar.`);
+                            } else {
+                                alert('No se pudo cargar el plan predefinido');
+                                planPredefinidoId.value = '';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar el plan:', error);
+                            alert('Error al intentar cargar el plan predefinido');
+                            planPredefinidoId.value = '';
+                        });
+                } else {
+                    // Si se selecciona "ninguno", limpiar el campo oculto
+                    planPredefinidoId.value = '';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
