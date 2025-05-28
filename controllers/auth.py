@@ -15,7 +15,6 @@ def register():
         password = request.form["password"]
         valid = True
 
-        # Validaciones
         if not email:
             errors['email'] = "El email es obligatorio"
             valid = False
@@ -53,7 +52,6 @@ def register():
             session['form_errors'] = errors
             return redirect(url_for("auth.register"))
 
-    # GET o después de POST con errores
     form_values = session.pop('form_values', {})
     form_errors = session.pop('form_errors', {})
     return render_template("auth/register.html", form_values=form_values, errors=form_errors)
@@ -66,7 +64,6 @@ def login():
         password = request.form["password"]
         valid = True
 
-        # Validaciones
         if not email:
             errors['email'] = "El email es obligatorio"
             valid = False
@@ -89,7 +86,6 @@ def login():
             session['form_errors'] = errors
             return redirect(url_for("auth.login"))
 
-    # GET o después de POST con errores
     form_values = session.pop('form_values', {})
     form_errors = session.pop('form_errors', {})
     return render_template("auth/login.html", form_values=form_values, errors=form_errors)

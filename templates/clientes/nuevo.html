@@ -7,29 +7,61 @@
 {% endblock %}
 
 {% block content %}
-<div class="secondary-nav">
-    <div class="breadcrumb">
-        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
-        <span class="breadcrumb-item">Nuevo Cliente</span>
-    </div>
-</div>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Nuevo Cliente</li>
+    </ol>
+</nav>
 
-<h1>Nuevo Cliente</h1>
+<h1 class="mb-4">Nuevo Cliente</h1>
 
 <div class="card">
-    <form method="post">
-        <input type="text" name="nombre" placeholder="Nombre" required minlength="2" maxlength="50">
-        <input type="email" name="email" placeholder="Email" required minlength="3" maxlength="80">
-        <input type="number" name="edad" placeholder="Edad" required min="1" max="120">
-        <input type="number" step="0.1" name="peso" placeholder="Peso (kg)" required min="10" max="500">
-        <input type="number" step="0.1" name="altura" placeholder="Altura (cm)" required min="50" max="300">
-        <select name="objetivo" required>
-            <option value="" disabled selected>Selecciona un objetivo</option>
-            <option value="Volumen">Volumen</option>
-            <option value="Mantenimiento">Mantenimiento</option>
-            <option value="Definición">Definición</option>
-        </select>
-        <button type="submit">Guardar</button>
-    </form>
+    <div class="card-body">
+        <form method="post" class="form-container">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" required minlength="2" maxlength="50">
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required minlength="3" maxlength="80">
+            </div>
+
+            <div class="mb-3">
+                <label for="edad" class="form-label">Edad</label>
+                <input type="number" class="form-control" id="edad" name="edad" required min="1" max="120">
+            </div>
+
+            <div class="mb-3">
+                <label for="peso" class="form-label">Peso (kg)</label>
+                <input type="number" step="0.1" class="form-control" id="peso" name="peso" required min="10" max="500">
+            </div>
+
+            <div class="mb-3">
+                <label for="altura" class="form-label">Altura (cm)</label>
+                <input type="number" step="0.1" class="form-control" id="altura" name="altura" required min="50"
+                    max="300">
+            </div>
+
+            <div class="mb-3">
+                <label for="objetivo" class="form-label">Objetivo</label>
+                <select class="form-select" id="objetivo" name="objetivo" required>
+                    <option value="" disabled selected>Selecciona un objetivo</option>
+                    <option value="Volumen">Volumen</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="Definición">Definición</option>
+                </select>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Guardar
+                </button>
+                <a href="{{ url_for('cliente.lista_clientes') }}" class="btn btn-secondary ms-2">Cancelar</a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

@@ -8,33 +8,69 @@
 {% endblock %}
 
 {% block content %}
-<div class="secondary-nav">
-    <div class="breadcrumb">
-        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
-        <span class="breadcrumb-item"><a
-                href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">{{ cliente.nombre
-                }}</a></span>
-        <span class="breadcrumb-item">Nueva semana</span>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">{{
+                cliente.nombre
+                }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Nueva semana</li>
+    </ol>
+</nav>
+
+<h1 class="mb-4">
+    <i class="fas fa-calendar-plus me-2 text-success"></i>Nueva semana para {{ cliente.nombre }}
+</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            <div class="mb-3">
+                <label for="estado" class="form-label">Estado general:</label>
+                <input type="text" id="estado" name="estado" placeholder="Estado actual (Ej: 5kg perdidos de grasa)"
+                    required minlength="3" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label for="notas" class="form-label">Notas de la semana:</label>
+                <textarea id="notas" name="notas" placeholder="Notas de la semana... (Ej. Semana baja en hidratos)"
+                    required minlength="5" class="form-control" rows="3"></textarea>
+            </div>
+
+            <h3 class="h4 mt-4 text-success mb-3">Objetivos nutricionales</h3>
+
+            <div class="row g-3">
+                <div class="col-md-3 col-sm-6">
+                    <label for="calorias" class="form-label">Calorías diarias:</label>
+                    <input type="number" id="calorias" name="calorias" placeholder="Calorías"
+                        value="{{ objetivos.calorias }}" required min="500" max="10000" class="form-control">
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <label for="proteinas" class="form-label">Proteínas (g):</label>
+                    <input type="number" id="proteinas" name="proteinas" placeholder="Proteínas (g)"
+                        value="{{ objetivos.proteinas }}" required min="10" max="500" class="form-control">
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <label for="hidratos" class="form-label">Hidratos (g):</label>
+                    <input type="number" id="hidratos" name="hidratos" placeholder="Hidratos (g)"
+                        value="{{ objetivos.hidratos }}" required min="10" max="1000" class="form-control">
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <label for="grasas" class="form-label">Grasas (g):</label>
+                    <input type="number" id="grasas" name="grasas" placeholder="Grasas (g)"
+                        value="{{ objetivos.grasas }}" required min="5" max="500" class="form-control">
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Crear semana
+                </button>
+            </div>
+        </form>
     </div>
-</div>
-
-<h1>Nueva semana para {{ cliente.nombre }}</h1>
-
-<div class="card">
-    <form method="post">
-        <input type="text" name="estado" placeholder="Estado actual" required minlength="3">
-        <textarea name="notas" placeholder="Notas de la semana..." required minlength="5"></textarea>
-
-        <h3>Objetivos nutricionales</h3>
-        <input type="number" name="calorias" placeholder="Calorías" value="{{ objetivos.calorias }}" required min="500"
-            max="10000">
-        <input type="number" name="proteinas" placeholder="Proteínas (g)" value="{{ objetivos.proteinas }}" required
-            min="10" max="500">
-        <input type="number" name="hidratos" placeholder="Hidratos (g)" value="{{ objetivos.hidratos }}" required
-            min="10" max="1000">
-        <input type="number" name="grasas" placeholder="Grasas (g)" value="{{ objetivos.grasas }}" required min="5"
-            max="500">
-        <button type="submit">Crear semana</button>
-    </form>
 </div>
 {% endblock %}

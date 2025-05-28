@@ -7,5 +7,5 @@ class SemanaNutricional:
         self.fecha_fin = fecha_fin
         self.estado_general = estado_general
         self.notas = notas
-        self.objetivos = objetivos  # dict con calorías, proteínas, hidratos, grasas
+        self.objetivos = objetivos 
         self.creado = datetime.now()

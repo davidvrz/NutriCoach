@@ -3,39 +3,47 @@
 {% block title %}Dashboard {{ cliente.nombre }} - NutriCoach{% endblock %}
 
 {% block content %}
-<div class="secondary-nav">
-    <div class="breadcrumb">
-        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
-        <span class="breadcrumb-item">{{ cliente.nombre }}</span>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ cliente.nombre }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Seguimiento de {{ cliente.nombre }}</h1>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="card-title h5 mb-0">Información del cliente</h2>
+            <a href="{{ url_for('cliente.editar_cliente', cliente_email=cliente.email) }}" class="btn btn-sm btn-info">
+                <i class="fas fa-edit me-1"></i>Editar datos
+            </a>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <p class="mb-1"><i class="fas fa-bullseye me-2"></i><strong>Objetivo:</strong> {{ cliente.objetivo }}
+                </p>
+                <p class="mb-1"><i class="fas fa-birthday-cake me-2"></i><strong>Edad:</strong> {{ cliente.edad }} años
+                </p>
+            </div>
+            <div class="col-md-6 mb-2">
+                <p class="mb-1"><i class="fas fa-weight me-2"></i><strong>Peso:</strong> {{ cliente.peso }} kg</p>
+                <p class="mb-1"><i class="fas fa-ruler-vertical me-2"></i><strong>Altura:</strong> {{ cliente.altura }}
+                    cm</p>
+            </div>
+        </div>
     </div>
 </div>
 
-<h1>Seguimiento de {{ cliente.nombre }}</h1>
-
-<div class="dashboard-actions">
-    <a href="{{ url_for('plan.lista_planes_predefinidos') }}" class="btn-secondary">
-        <i class="icon-template"></i> Planes predefinidos
-    </a>
-</div>
-
-<div class="card">
-    <div class="cliente-header">
-        <h2 class="card-title">Información del cliente</h2>
-        <a href="{{ url_for('cliente.editar_cliente', cliente_email=cliente.email) }}" class="btn-editar">Editar
-            datos</a>
-    </div>
-    <p><strong>Objetivo:</strong> {{ cliente.objetivo }}</p>
-    <p><strong>Edad:</strong> {{ cliente.edad }} años</p>
-    <p><strong>Peso:</strong> {{ cliente.peso }} kg</p>
-    <p><strong>Altura:</strong> {{ cliente.altura }} cm</p>
-</div>
-
-<div class="semanas-timeline">
-    <h2>Cronograma de semanas nutricionales</h2>
-
-    <div class="timeline-actions">
-        <a href="{{ url_for('semana.nueva_semana', cliente_email=cliente.email) }}" class="btn-primary">+ Crear nueva
-            semana</a>
+<div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 text-success">Cronograma de semanas nutricionales</h2>
+        <a href="{{ url_for('semana.nueva_semana', cliente_email=cliente.email) }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Crear nueva semana
+        </a>
     </div>
 
     {% if semanas %}
@@ -46,28 +54,30 @@
             {% set semana = s.semana %}
             {% set safe_id = s.safe_id %}
             {% set index = loop.index %}
-            {% set today = now.date() %}
-            {% set is_current = semana.fecha_inicio <= today and today <=semana.fecha_fin %} <div
-                class="timeline-card {% if is_current %}current{% endif %}">
+            {% set today = now %}
+            {% set is_current = semana.fecha_inicio.date() <= today.date() and today.date() <= semana.fecha_fin.date() %}
+            <div
+                class="timeline-card card {% if is_current %}current border-success{% endif %}">
                 <div class="timeline-dot"></div>
-                <div class="timeline-card-header">
+                <div class="card-header bg-light">
                     <div class="timeline-date">{{ semana.fecha_inicio.strftime("%d/%m") }} - {{
                         semana.fecha_fin.strftime("%d/%m") }}</div>
-                    <div class="timeline-estado">{{ semana.estado_general }}</div>
+                    <div class="text-muted">{{ semana.estado_general }}</div>
                 </div>
-                <div class="timeline-card-content">
-                    <div class="timeline-card-actions">
-                        <a href="{{ url_for('semana.ver_semana', cliente_email=cliente.email, safe_id=safe_id) }}"
-                            class="btn-ver-semana">Ver semana completa</a>
-                    </div>
+                <div class="card-body text-center">
+                    <a href="{{ url_for('semana.ver_semana', cliente_email=cliente.email, safe_id=safe_id) }}"
+                        class="btn btn-success btn-sm">
+                        <i class="fas fa-calendar-week me-1"></i>Ver semana completa
+                    </a>
                 </div>
         </div>
         {% endfor %}
     </div>
 </div>
 {% else %}
-<div class="timeline-empty">
-    <p>No hay semanas de seguimiento aún. Crea una nueva semana para comenzar el seguimiento nutricional.</p>
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>No hay semanas de seguimiento aún. Crea una nueva semana para comenzar el
+    seguimiento nutricional.
 </div>
 {% endif %}
 </div>
@@ -75,44 +85,13 @@
 
 {% block extra_css %}
 <style>
-    .cliente-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .btn-editar {
-        background-color: var(--accent-color);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 4px;
-        text-decoration: none;
-        font-size: 14px;
-    }
-
-    .btn-editar:hover {
-        background-color: #0288d1;
-    }
-
-    /* Timeline de semanas */
-    .semanas-timeline {
-        margin-top: 30px;
-    }
-
-    .semanas-timeline h2 {
-        margin-bottom: 20px;
-        color: var(--primary-color);
-    }
-
+    /* Timeline personalizados para Bootstrap */
     .timeline-wrapper {
         position: relative;
         padding: 50px 0 30px;
-        /* Aumentado el margen superior */
         overflow-x: auto;
         margin-bottom: 20px;
         scrollbar-width: thin;
-        scrollbar-color: var(--primary-color) #f0f0f0;
     }
 
     .timeline-wrapper::-webkit-scrollbar {
@@ -133,7 +112,6 @@
     .timeline-line {
         position: absolute;
         top: 100px;
-        /* Aumentado para dar más espacio */
         left: 0;
         height: 4px;
         background-color: #ddd;
@@ -152,28 +130,25 @@
     }
 
     .timeline-card {
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
         width: 250px;
         flex-shrink: 0;
         position: relative;
         z-index: 2;
+        transition: transform 0.3s ease;
+    }
+
+    .timeline-card:hover {
+        transform: translateY(-5px);
     }
 
     .timeline-card.current {
         width: 280px;
-        border: 3px solid var(--primary-color);
-        /* Borde más grueso del color de la app */
-        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
-        /* Sombra con el color de la app */
+        box-shadow: 0 0.5rem 1rem rgba(76, 175, 80, 0.15) !important;
     }
 
     .timeline-dot {
         position: absolute;
         top: -25px;
-        /* Ajustado para dar más espacio */
         left: 50%;
         transform: translateX(-50%);
         width: 16px;
@@ -181,83 +156,6 @@
         background-color: var(--primary-color);
         border-radius: 50%;
         border: 3px solid white;
-    }
-
-    .timeline-card-header {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 15px 20px;
-        background-color: #f9f9f9;
-        border-bottom: 1px solid #eee;
-        position: relative;
-    }
-
-    .timeline-date {
-        font-weight: 600;
-        font-size: 1rem;
-        margin-bottom: 5px;
-        text-align: center;
-    }
-
-    .timeline-estado {
-        color: #666;
-        font-size: 0.9rem;
-        text-align: center;
-    }
-
-    .timeline-card-content {
-        padding: 15px;
-        text-align: center;
-    }
-
-    .timeline-card-actions {
-        text-align: center;
-    }
-
-    .btn-ver-semana {
-        background-color: var(--primary-color);
-        color: white;
-        padding: 8px 15px;
-        border-radius: 4px;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 0.9rem;
-    }
-
-    .btn-ver-semana:hover {
-        opacity: 0.9;
-        text-decoration: none;
-        color: white;
-    }
-
-    .dashboard-actions {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 20px;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-        padding: 8px 15px;
-        border-radius: 4px;
-        text-decoration: none;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .btn-secondary:hover {
-        background-color: #5a6268;
-        text-decoration: none;
-        color: white;
-    }
-
-    .icon-template::before {
-        content: "📋";
-        font-size: 16px;
     }
 
     @media (max-width: 768px) {

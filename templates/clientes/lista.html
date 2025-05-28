@@ -7,24 +7,41 @@
 {% endblock %}
 
 {% block content %}
-<h1>Mis Clientes</h1>
+<div class="row mb-4">
+    <div class="col">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Mis Clientes</h1>
+            <a href="{{ url_for('plan.lista_planes_predefinidos') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-clipboard-list me-2"></i>Planes predefinidos
+            </a>
+        </div>
 
-{% if clientes %}
-<ul class="cliente-list">
-    {% for c in clientes %}
-    <li class="cliente-item">
-        <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=c.email) }}">
-            {{ c.nombre }}
-        </a> <a href="{{ url_for('cliente.eliminar_cliente', cliente_email=c.email) }}" class="eliminar-btn"
-            data-confirm="¿Estás seguro de que deseas eliminar a este cliente y todos sus datos? Esta acción no se puede deshacer.">
-            Eliminar
-        </a>
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>Aún no tienes ningún cliente registrado.</p>
-{% endif %}
+        {% if clientes %}
+        <ul class="list-unstyled">
+            {% for c in clientes %}
+            <li class="cliente-item">
+                <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=c.email) }}"
+                    class="text-decoration-none">
+                    <i class="fas fa-user me-2"></i>{{ c.nombre }}
+                </a>
+                <a href="{{ url_for('cliente.eliminar_cliente', cliente_email=c.email) }}" class="btn-eliminar"
+                    data-confirm="¿Estás seguro de que deseas eliminar a este cliente y todos sus datos? Esta acción no se puede deshacer.">
+                    <i class="fas fa-trash-alt me-1"></i>Eliminar
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>Aún no tienes ningún cliente registrado.
+        </div>
+        {% endif %}
 
-<a href="{{ url_for('cliente.nuevo_cliente') }}" class="btn-primary">Añadir nuevo cliente</a>
+        <div class="mt-4">
+            <a href="{{ url_for('cliente.nuevo_cliente') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Añadir nuevo cliente
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock %}

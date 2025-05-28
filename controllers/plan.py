@@ -6,11 +6,9 @@ from datetime import datetime
 
 bp = Blueprint("plan", __name__, url_prefix="/planes")
 
-# Rutas existentes
 @bp.route("/<cliente_email>/semana/<safe_id>/editar/<fecha>", methods=["GET", "POST"])
 @login_required
 def editar_dia(cliente_email, safe_id, fecha):
-    # Validar y cargar la semana
     try:
         oid = g.srp.oid_from_safe(safe_id)
         semana = g.srp.load(oid)
@@ -18,18 +16,15 @@ def editar_dia(cliente_email, safe_id, fecha):
             flash("Semana no encontrada", "error")
             return redirect(url_for("cliente.dashboard_cliente", cliente_email=cliente_email))
             
-        # Validar formato de fecha
         fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
     except Exception:
         flash("Datos de semana o fecha no válidos", "error")
         return redirect(url_for("cliente.dashboard_cliente", cliente_email=cliente_email))
-
-    # Buscar si ya existe un plan para ese día
+    
     plan_existente = g.srp.find_first(PlanAlimenticioDiario, lambda p: p.id_semana == oid and p.fecha == fecha_obj)
-      # Obtener los planes predefinidos del coach
+    
     planes_predefinidos = list(g.srp.filter(PlanPredefinido, lambda p: p.coach_email == current_user.email))
     
-    # Preparar los planes predefinidos con IDs seguros para la plantilla
     planes_con_safe_id = []
     for plan in planes_predefinidos:
         plan_data = plan.__dict__.copy()
@@ -40,7 +35,6 @@ def editar_dia(cliente_email, safe_id, fecha):
         estado = request.form["estado"]
         notas = request.form["notas"]
         
-        # Verificar si se está utilizando un plan predefinido
         plan_predefinido_id = request.form.get("plan_predefinido", "")
         if plan_predefinido_id and plan_predefinido_id != "ninguno":
             try:
@@ -54,7 +48,6 @@ def editar_dia(cliente_email, safe_id, fecha):
                 # Actualizar cualquier valor específico modificado en el formulario
                 for comida in ["desayuno", "comida", "merienda", "cena", "snacks"]:
                     if comida in comidas and (request.form.get(f"{comida}_desc") or request.form.get(f"{comida}_cal")):
-                        # Si hay valores personalizados, actualizarlos
                         try:
                             valores = {
                                 "calorias": int(request.form.get(f"{comida}_cal", comidas[comida]["calorias"])),
@@ -63,7 +56,6 @@ def editar_dia(cliente_email, safe_id, fecha):
                                 "grasas": int(request.form.get(f"{comida}_gras", comidas[comida]["grasas"]))
                             }
                             
-                            # Validar rangos
                             if not (0 <= valores["calorias"] <= 5000 and 
                                    0 <= valores["proteinas"] <= 300 and 
                                    0 <= valores["hidratos"] <= 500 and 
@@ -71,7 +63,6 @@ def editar_dia(cliente_email, safe_id, fecha):
                                 flash(f"Algunos valores nutricionales para {comida} están fuera de rango", "error")
                                 return redirect(url_for("plan.editar_dia", cliente_email=cliente_email, safe_id=safe_id, fecha=fecha))
                             
-                            # Actualizar descripción y valores
                             nueva_desc = request.form.get(f"{comida}_desc", comidas[comida]["descripcion"])
                             comidas[comida] = {
                                 "descripcion": nueva_desc,
@@ -84,13 +75,11 @@ def editar_dia(cliente_email, safe_id, fecha):
                 flash("Plan predefinido no encontrado", "error")
                 return redirect(url_for("plan.editar_dia", cliente_email=cliente_email, safe_id=safe_id, fecha=fecha))
         else:
-            # Procesar datos de comidas manualmente (código existente)
+            # Procesar datos de comidas manualmente
             comidas = {}
             for comida in ["desayuno", "comida", "merienda", "cena", "snacks"]:
-                # Solo procesar si hay datos para esta comida
                 if request.form.get(f"{comida}_desc") or request.form.get(f"{comida}_cal"):
                     try:
-                        # Capturar y validar valores nutricionales
                         valores = {
                             "calorias": int(request.form.get(f"{comida}_cal", 0)),
                             "proteinas": int(request.form.get(f"{comida}_prot", 0)),
@@ -98,7 +87,6 @@ def editar_dia(cliente_email, safe_id, fecha):
                             "grasas": int(request.form.get(f"{comida}_gras", 0))
                         }
                         
-                        # Validar rangos en una sola condición
                         if not (0 <= valores["calorias"] <= 5000 and 
                                0 <= valores["proteinas"] <= 300 and 
                                0 <= valores["hidratos"] <= 500 and 
@@ -106,16 +94,13 @@ def editar_dia(cliente_email, safe_id, fecha):
                             flash(f"Algunos valores nutricionales para {comida} están fuera de rango", "error")
                             return redirect(url_for("plan.editar_dia", cliente_email=cliente_email, safe_id=safe_id, fecha=fecha))
                         
-                        # Guardar datos de esta comida
                         comidas[comida] = {
                             "descripcion": request.form[f"{comida}_desc"],
-                            **valores  # Incorporar todos los valores nutricionales
+                            **valores 
                         }
                     except ValueError:
                         flash(f"Los valores para {comida} deben ser números válidos", "error")
                         return redirect(url_for("plan.editar_dia", cliente_email=cliente_email, safe_id=safe_id, fecha=fecha))
-        
-        # Validación básica del estado
         if not estado or len(estado) < 3:
             flash("El estado del día debe tener al menos 3 caracteres", "error")
             return redirect(url_for("plan.editar_dia", cliente_email=cliente_email, safe_id=safe_id, fecha=fecha))
@@ -125,9 +110,16 @@ def editar_dia(cliente_email, safe_id, fecha):
             plan_existente.estado = estado
             plan_existente.notas = notas
             plan_existente.comidas = comidas
+            # Actualizar el ID del plan predefinido si se está utilizando uno
+            if plan_predefinido_id and plan_predefinido_id != "ninguno":
+                plan_existente.plan_predefinido_id = plan_predefinido_id
+            else:
+                plan_existente.plan_predefinido_id = None
+            g.srp.save(plan_existente)
             plan = plan_existente
         else:
-            plan = PlanAlimenticioDiario(oid, fecha_obj, estado, notas, comidas)
+            plan_pred_id = plan_predefinido_id if plan_predefinido_id and plan_predefinido_id != "ninguno" else None
+            plan = PlanAlimenticioDiario(oid, fecha_obj, estado, notas, comidas, plan_pred_id)
             g.srp.save(plan)
         flash("Plan alimenticio actualizado correctamente", "success")
         return redirect(url_for("semana.ver_semana", cliente_email=cliente_email, safe_id=safe_id))
@@ -142,7 +134,6 @@ def editar_dia(cliente_email, safe_id, fecha):
         planes_predefinidos=planes_con_safe_id
     )
 
-# Ruta para obtener plan predefinido mediante AJAX
 @bp.route("/predefinido/<safe_id>", methods=["GET"])
 @login_required
 def obtener_plan_predefinido(safe_id):
@@ -150,7 +141,6 @@ def obtener_plan_predefinido(safe_id):
         oid = g.srp.oid_from_safe(safe_id)
         plan = g.srp.load(oid)
         
-        # Verificar que el plan pertenece al coach actual
         if not plan or plan.coach_email != current_user.email:
             return jsonify({"error": "Plan no encontrado"}), 404
             
@@ -164,14 +154,12 @@ def obtener_plan_predefinido(safe_id):
     except Exception:
         return jsonify({"error": "Error al cargar el plan"}), 500
 
-# Nuevas rutas para gestionar los planes predefinidos
 @bp.route("/predefinidos")
 @login_required
 def lista_planes_predefinidos():
     planes = list(g.srp.filter(PlanPredefinido, lambda p: p.coach_email == current_user.email))
-    planes.sort(key=lambda p: p.actualizado, reverse=True)  # Ordenar por fecha de actualización
-    
-    # Preparar los datos para la plantilla con los IDs convertidos
+    planes.sort(key=lambda p: p.actualizado, reverse=True)  
+
     planes_con_safe_id = []
     for plan in planes:
         plan_data = plan.__dict__.copy()
@@ -188,18 +176,14 @@ def nuevo_plan_predefinido():
         descripcion = request.form["descripcion"]
         tipo = request.form["tipo"]
         
-        # Validaciones básicas
         if not nombre or len(nombre) < 3:
             flash("El nombre debe tener al menos 3 caracteres", "error")
             return redirect(url_for("plan.nuevo_plan_predefinido"))
             
-        # Procesar datos de comidas
         comidas = {}
         for comida in ["desayuno", "comida", "merienda", "cena", "snacks"]:
-            # Solo procesar si hay datos para esta comida
             if request.form.get(f"{comida}_desc") or request.form.get(f"{comida}_cal"):
                 try:
-                    # Capturar y validar valores nutricionales
                     valores = {
                         "calorias": int(request.form.get(f"{comida}_cal", 0)),
                         "proteinas": int(request.form.get(f"{comida}_prot", 0)),
@@ -207,7 +191,6 @@ def nuevo_plan_predefinido():
                         "grasas": int(request.form.get(f"{comida}_gras", 0))
                     }
                     
-                    # Validar rangos en una sola condición
                     if not (0 <= valores["calorias"] <= 5000 and 
                            0 <= valores["proteinas"] <= 300 and 
                            0 <= valores["hidratos"] <= 500 and 
@@ -215,16 +198,14 @@ def nuevo_plan_predefinido():
                         flash(f"Algunos valores nutricionales para {comida} están fuera de rango", "error")
                         return redirect(url_for("plan.nuevo_plan_predefinido"))
                     
-                    # Guardar datos de esta comida
                     comidas[comida] = {
                         "descripcion": request.form[f"{comida}_desc"],
-                        **valores  # Incorporar todos los valores nutricionales
+                        **valores 
                     }
                 except ValueError:
                     flash(f"Los valores para {comida} deben ser números válidos", "error")
                     return redirect(url_for("plan.nuevo_plan_predefinido"))
 
-        # Crear y guardar el plan predefinido
         plan = PlanPredefinido(current_user.email, nombre, descripcion, comidas, tipo)
         g.srp.save(plan)
         flash("Plan predefinido creado correctamente", "success")
@@ -239,7 +220,6 @@ def editar_plan_predefinido(safe_id):
         oid = g.srp.oid_from_safe(safe_id)
         plan = g.srp.load(oid)
         
-        # Verificar que el plan pertenece al coach actual
         if not plan or plan.coach_email != current_user.email:
             flash("Plan predefinido no encontrado", "error")
             return redirect(url_for("plan.lista_planes_predefinidos"))
@@ -252,18 +232,14 @@ def editar_plan_predefinido(safe_id):
         descripcion = request.form["descripcion"]
         tipo = request.form["tipo"]
         
-        # Validaciones básicas
         if not nombre or len(nombre) < 3:
             flash("El nombre debe tener al menos 3 caracteres", "error")
             return redirect(url_for("plan.editar_plan_predefinido", safe_id=safe_id))
             
-        # Procesar datos de comidas
         comidas = {}
         for comida in ["desayuno", "comida", "merienda", "cena", "snacks"]:
-            # Solo procesar si hay datos para esta comida
             if request.form.get(f"{comida}_desc") or request.form.get(f"{comida}_cal"):
                 try:
-                    # Capturar y validar valores nutricionales
                     valores = {
                         "calorias": int(request.form.get(f"{comida}_cal", 0)),
                         "proteinas": int(request.form.get(f"{comida}_prot", 0)),
@@ -271,7 +247,6 @@ def editar_plan_predefinido(safe_id):
                         "grasas": int(request.form.get(f"{comida}_gras", 0))
                     }
                     
-                    # Validar rangos en una sola condición
                     if not (0 <= valores["calorias"] <= 5000 and 
                            0 <= valores["proteinas"] <= 300 and 
                            0 <= valores["hidratos"] <= 500 and 
@@ -279,16 +254,14 @@ def editar_plan_predefinido(safe_id):
                         flash(f"Algunos valores nutricionales para {comida} están fuera de rango", "error")
                         return redirect(url_for("plan.editar_plan_predefinido", safe_id=safe_id))
                     
-                    # Guardar datos de esta comida
                     comidas[comida] = {
                         "descripcion": request.form[f"{comida}_desc"],
-                        **valores  # Incorporar todos los valores nutricionales
+                        **valores
                     }
                 except ValueError:
                     flash(f"Los valores para {comida} deben ser números válidos", "error")
                     return redirect(url_for("plan.editar_plan_predefinido", safe_id=safe_id))
 
-        # Actualizar el plan
         plan.nombre = nombre
         plan.descripcion = descripcion
         plan.tipo = tipo
@@ -308,12 +281,10 @@ def eliminar_plan_predefinido(safe_id):
         oid = g.srp.oid_from_safe(safe_id)
         plan = g.srp.load(oid)
         
-        # Verificar que el plan pertenece al coach actual
         if not plan or plan.coach_email != current_user.email:
             flash("Plan predefinido no encontrado", "error")
             return redirect(url_for("plan.lista_planes_predefinidos"))
             
-        # Eliminar el plan
         g.srp.delete(oid)
         flash("Plan predefinido eliminado correctamente", "success")
         

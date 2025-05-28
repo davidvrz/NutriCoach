@@ -3,124 +3,73 @@
 {% block title %}Editar semana - {{ cliente.nombre }} - NutriCoach{% endblock %}
 
 {% block content %}
-<div class="secondary-nav">
-    <div class="breadcrumb">
-        <span class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></span>
-        <span class="breadcrumb-item"><a
-                href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">{{ cliente.nombre
-                }}</a></span>
-        <span class="breadcrumb-item">Editar semana</span>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente.email) }}">{{
+                cliente.nombre
+                }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Editar semana</li>
+    </ol>
+</nav>
+
+<h1 class="mb-4">
+    <i class="fas fa-edit me-2 text-success"></i>Editar semana: {{ semana.fecha_inicio.strftime("%d/%m/%Y") }} - {{
+    semana.fecha_fin.strftime("%d/%m/%Y") }}
+</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            <div class="mb-3">
+                <label for="estado" class="form-label">Estado general:</label>
+                <input type="text" id="estado" name="estado" value="{{ semana.estado_general }}" required minlength="3"
+                    class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label for="notas" class="form-label">Notas de la semana:</label>
+                <textarea id="notas" name="notas" required minlength="5" class="form-control"
+                    rows="3">{{ semana.notas }}</textarea>
+            </div>
+
+            <h3 class="h4 mt-4 text-success mb-3">Objetivos nutricionales</h3>
+            <div class="row g-3">
+                <div class="col-md-3 col-sm-6">
+                    <label for="calorias" class="form-label">Calorías diarias:</label>
+                    <input type="number" id="calorias" name="calorias" value="{{ semana.objetivos.calorias }}" required
+                        min="500" max="10000" class="form-control">
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <label for="proteinas" class="form-label">Proteínas (g):</label>
+                    <input type="number" id="proteinas" name="proteinas" value="{{ semana.objetivos.proteinas }}"
+                        required min="10" max="500" class="form-control">
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <label for="hidratos" class="form-label">Hidratos (g):</label>
+                    <input type="number" id="hidratos" name="hidratos" value="{{ semana.objetivos.hidratos }}" required
+                        min="10" max="1000" class="form-control">
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <label for="grasas" class="form-label">Grasas (g):</label>
+                    <input type="number" id="grasas" name="grasas" value="{{ semana.objetivos.grasas }}" required
+                        min="5" max="500" class="form-control">
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Guardar cambios
+                </button>
+                <a href="{{ url_for('semana.ver_semana', cliente_email=cliente.email, safe_id=safe_id) }}"
+                    class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </a>
+            </div>
+        </form>
     </div>
 </div>
-
-<h1>Editar semana: {{ semana.fecha_inicio.strftime("%d/%m/%Y") }} - {{ semana.fecha_fin.strftime("%d/%m/%Y") }}</h1>
-
-<div class="card">
-    <form method="post">
-        <div class="form-group">
-            <label for="estado">Estado general:</label>
-            <input type="text" id="estado" name="estado" value="{{ semana.estado_general }}" required minlength="3">
-        </div>
-
-        <div class="form-group">
-            <label for="notas">Notas de la semana:</label>
-            <textarea id="notas" name="notas" required minlength="5">{{ semana.notas }}</textarea>
-        </div>
-
-        <h3>Objetivos nutricionales</h3>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="calorias">Calorías diarias:</label>
-                <input type="number" id="calorias" name="calorias" value="{{ semana.objetivos.calorias }}" required
-                    min="500" max="10000">
-            </div>
-
-            <div class="form-group">
-                <label for="proteinas">Proteínas (g):</label>
-                <input type="number" id="proteinas" name="proteinas" value="{{ semana.objetivos.proteinas }}" required
-                    min="10" max="500">
-            </div>
-
-            <div class="form-group">
-                <label for="hidratos">Hidratos (g):</label>
-                <input type="number" id="hidratos" name="hidratos" value="{{ semana.objetivos.hidratos }}" required
-                    min="10" max="1000">
-            </div>
-
-            <div class="form-group">
-                <label for="grasas">Grasas (g):</label>
-                <input type="number" id="grasas" name="grasas" value="{{ semana.objetivos.grasas }}" required min="5"
-                    max="500">
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn-primary">Guardar cambios</button>
-            <a href="{{ url_for('semana.ver_semana', cliente_email=cliente.email, safe_id=safe_id) }}"
-                class="btn-secondary">Cancelar</a>
-        </div>
-    </form>
-</div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 500;
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 16px;
-    }
-
-    .form-group textarea {
-        min-height: 100px;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-        padding: 12px 15px;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 16px;
-        display: inline-block;
-    }
-
-    .btn-secondary:hover {
-        background-color: #5a6268;
-        text-decoration: none;
-        color: white;
-    }
-
-    h3 {
-        margin-top: 20px;
-        margin-bottom: 15px;
-        color: var(--primary-color);
-    }
-</style>
 {% endblock %}

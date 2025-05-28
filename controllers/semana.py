@@ -11,11 +11,9 @@ bp = Blueprint("semana", __name__, url_prefix="/semanas")
 def get_dias_semana(semana):
     dias = []
     
-    # Obtener planes existentes
     planes = list(g.srp.filter(PlanAlimenticioDiario, lambda p: p.id_semana == semana.__oid__))
     planes_por_fecha = {p.fecha.strftime('%Y-%m-%d'): p for p in planes}
     
-    # Generar los 7 días de la semana
     for i in range(7):
         dia = semana.fecha_inicio + timedelta(days=i)
         clave = dia.strftime('%Y-%m-%d')
@@ -24,7 +22,6 @@ def get_dias_semana(semana):
         
     return dias
 
-# Exponemos la función como un helper para las plantillas
 @bp.app_template_filter('get_dias_semana')
 def get_dias_semana_filter(semana):
     return get_dias_semana(semana)
@@ -32,7 +29,6 @@ def get_dias_semana_filter(semana):
 @bp.route("/<cliente_email>/nueva", methods=["GET", "POST"])
 @login_required
 def nueva_semana(cliente_email):
-    # Verificar que el cliente existe
     cliente = g.srp.find_first(Cliente, lambda c: c.email == cliente_email and c.coach_email == current_user.email)
     if not cliente:
         flash("Cliente no encontrado", "error")
@@ -42,19 +38,16 @@ def nueva_semana(cliente_email):
         estado = request.form["estado"]
         notas = request.form["notas"]
         
-        # Validaciones básicas
         if not estado or not notas or len(estado) < 3 or len(notas) < 5:
             flash("El estado debe tener al menos 3 caracteres y las notas al menos 5", "error")
             return redirect(url_for("semana.nueva_semana", cliente_email=cliente_email))
         
-        # Validar valores nutricionales
         try:
             calorias = int(request.form["calorias"])
             proteinas = int(request.form["proteinas"])
             hidratos = int(request.form["hidratos"])
             grasas = int(request.form["grasas"])
             
-            # Validar rangos en una sola condición
             if not (500 <= calorias <= 10000 and 10 <= proteinas <= 500 and 
                    10 <= hidratos <= 1000 and 5 <= grasas <= 500):
                 flash("Algunos valores nutricionales están fuera del rango permitido", "error")
@@ -64,7 +57,6 @@ def nueva_semana(cliente_email):
             flash("Los valores nutricionales deben ser números válidos", "error")
             return redirect(url_for("semana.nueva_semana", cliente_email=cliente_email))
 
-        # Buscar la última semana creada para este cliente
         ultimas_semanas = list(g.srp.filter(SemanaNutricional, lambda s: s.cliente_email == cliente_email))
         ultimas_semanas.sort(key=lambda s: s.fecha_fin, reverse=True)
         
@@ -81,7 +73,6 @@ def nueva_semana(cliente_email):
                 dias_hasta_lunes = 7  # Si hoy es lunes, empezar el próximo lunes
             fecha_inicio = hoy + timedelta(days=dias_hasta_lunes)
         
-        # La semana dura 7 días
         fecha_fin = fecha_inicio + timedelta(days=6)
         
         objetivos = {
@@ -103,7 +94,7 @@ def nueva_semana(cliente_email):
         flash("Nueva semana creada correctamente", "success")
         return redirect(url_for("cliente.dashboard_cliente", cliente_email=cliente_email))
 
-    # GET → pre-rellenar con última semana si existe
+    # rellenar con última semana si existe
     ultimas_semanas = list(g.srp.filter(SemanaNutricional, lambda s: s.cliente_email == cliente_email))
     ultimas_semanas.sort(key=lambda s: s.fecha_inicio, reverse=True)
     objetivos_default = {"calorias": "", "proteinas": "", "hidratos": "", "grasas": ""}
@@ -114,17 +105,14 @@ def nueva_semana(cliente_email):
 @bp.route("/<cliente_email>/ver/<safe_id>")
 @login_required
 def ver_semana(cliente_email, safe_id):
-    # Intentar cargar la semana por su ID seguro
     try:
         oid = g.srp.oid_from_safe(safe_id)
         semana = g.srp.load(oid)
         
-        # Verificar que la semana existe y pertenece al cliente
         if not semana or semana.cliente_email != cliente_email:
             flash("Semana no encontrada", "error")
             return redirect(url_for("cliente.dashboard_cliente", cliente_email=cliente_email))
             
-        # Obtener días y planes de la semana
         return render_template("semana_nutricional/semana.html", semana=semana, cliente_email=cliente_email, safe_id=safe_id)
         
     except Exception:
@@ -134,13 +122,11 @@ def ver_semana(cliente_email, safe_id):
 @bp.route("/<cliente_email>/editar/<safe_id>", methods=["GET", "POST"])
 @login_required
 def editar_semana(cliente_email, safe_id):
-    # Verificar que el cliente existe
     cliente = g.srp.find_first(Cliente, lambda c: c.email == cliente_email and c.coach_email == current_user.email)
     if not cliente:
         flash("Cliente no encontrado", "error")
         return redirect(url_for("cliente.lista_clientes"))
         
-    # Cargar la semana
     try:
         oid = g.srp.oid_from_safe(safe_id)
         semana = g.srp.load(oid)
@@ -156,19 +142,16 @@ def editar_semana(cliente_email, safe_id):
         estado = request.form["estado"]
         notas = request.form["notas"]
         
-        # Validaciones básicas
         if not estado or not notas or len(estado) < 3 or len(notas) < 5:
             flash("El estado debe tener al menos 3 caracteres y las notas al menos 5", "error")
             return redirect(url_for("semana.editar_semana", cliente_email=cliente_email, safe_id=safe_id))
         
-        # Validar valores nutricionales
         try:
             calorias = int(request.form["calorias"])
             proteinas = int(request.form["proteinas"])
             hidratos = int(request.form["hidratos"])
             grasas = int(request.form["grasas"])
             
-            # Validar rangos en una sola condición
             if not (500 <= calorias <= 10000 and 10 <= proteinas <= 500 and 
                    10 <= hidratos <= 1000 and 5 <= grasas <= 500):
                 flash("Algunos valores nutricionales están fuera del rango permitido", "error")
@@ -178,7 +161,6 @@ def editar_semana(cliente_email, safe_id):
             flash("Los valores nutricionales deben ser números válidos", "error")
             return redirect(url_for("semana.editar_semana", cliente_email=cliente_email, safe_id=safe_id))
         
-        # Actualizar la semana
         semana.estado_general = estado
         semana.notas = notas
         semana.objetivos = {
@@ -192,19 +174,16 @@ def editar_semana(cliente_email, safe_id):
         flash("Semana actualizada correctamente", "success")
         return redirect(url_for("semana.ver_semana", cliente_email=cliente_email, safe_id=safe_id))
         
-    # GET - Mostrar formulario con datos actuales
     return render_template("semana_nutricional/editar_semana.html", cliente=cliente, semana=semana, safe_id=safe_id)
 
 @bp.route("/<cliente_email>/eliminar/<safe_id>")
 @login_required
 def eliminar_semana(cliente_email, safe_id):
-    # Verificar que el cliente existe
     cliente = g.srp.find_first(Cliente, lambda c: c.email == cliente_email and c.coach_email == current_user.email)
     if not cliente:
         flash("Cliente no encontrado", "error")
         return redirect(url_for("cliente.lista_clientes"))
     
-    # Cargar la semana
     try:
         oid = g.srp.oid_from_safe(safe_id)
         semana = g.srp.load(oid)
@@ -213,14 +192,11 @@ def eliminar_semana(cliente_email, safe_id):
             flash("Semana no encontrada", "error")
             return redirect(url_for("cliente.dashboard_cliente", cliente_email=cliente_email))
             
-        # Buscar todos los planes asociados a la semana
         planes = list(g.srp.filter(PlanAlimenticioDiario, lambda p: p.id_semana == oid))
         
-        # Eliminar primero los planes
         for plan in planes:
             g.srp.delete(plan.__oid__)
         
-        # Finalmente eliminar la semana
         g.srp.delete(oid)
         
         flash("Semana eliminada correctamente", "success")
