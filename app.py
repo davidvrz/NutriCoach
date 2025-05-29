@@ -1,4 +1,4 @@
-from flask import Flask, redirect, g
+from flask import Flask, redirect, g, url_for
 from flask_login import LoginManager
 import sirope
 from datetime import datetime
@@ -36,11 +36,11 @@ def create_app():
 
     @app.route("/")
     def index():
-        return redirect("/clientes")
+        return redirect(url_for("cliente.lista_clientes"))
 
     @app.route("/home")
     def home():
-        return redirect("/clientes")
+        return redirect(url_for("cliente.lista_clientes"))
 
     return app
 

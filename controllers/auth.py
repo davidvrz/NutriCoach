@@ -43,7 +43,7 @@ def register():
             coach = Coach(email, nombre, generate_password_hash(password))
             g.srp.save(coach)
             login_user(coach)
-            return redirect("/clientes")
+            return redirect(url_for("cliente.lista_clientes"))
         else:
             # Flash solo un mensaje genérico de error
             flash("Por favor, corrige los errores en el formulario", "error")
@@ -79,7 +79,7 @@ def login():
                 return redirect(url_for("auth.login"))
 
             login_user(coach)
-            return redirect("/clientes")
+            return redirect(url_for("cliente.lista_clientes"))
         else:
             flash("Por favor, corrige los errores en el formulario", "error")
             session['form_values'] = request.form
@@ -94,4 +94,4 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect("/login")
+    return redirect(url_for("auth.login"))
