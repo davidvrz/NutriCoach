@@ -44,10 +44,34 @@ def editar_dia(cliente_email, safe_id, fecha):
                 
                 # Usar las comidas del plan predefinido
                 comidas = plan_predefinido.comidas.copy()
-                
-                # Actualizar cualquier valor específico modificado en el formulario
+                  # Actualizar cualquier valor específico modificado en el formulario
                 for comida in ["desayuno", "comida", "merienda", "cena", "snacks"]:
-                    if comida in comidas and (request.form.get(f"{comida}_desc") or request.form.get(f"{comida}_cal")):
+                    # Si la comida no existe en el plan predefinido pero se ha añadido en el formulario
+                    if comida not in comidas and (request.form.get(f"{comida}_desc") or request.form.get(f"{comida}_cal")):
+                        try:
+                            valores = {
+                                "calorias": int(request.form.get(f"{comida}_cal", 0)),
+                                "proteinas": int(request.form.get(f"{comida}_prot", 0)),
+                                "hidratos": int(request.form.get(f"{comida}_hidr", 0)),
+                                "grasas": int(request.form.get(f"{comida}_gras", 0))
+                            }
+                            
+                            if not (0 <= valores["calorias"] <= 5000 and 
+                                   0 <= valores["proteinas"] <= 300 and 
+                                   0 <= valores["hidratos"] <= 500 and 
+                                   0 <= valores["grasas"] <= 300):
+                                flash(f"Algunos valores nutricionales para {comida} están fuera de rango", "error")
+                                return redirect(url_for("plan.editar_dia", cliente_email=cliente_email, safe_id=safe_id, fecha=fecha))
+                            
+                            comidas[comida] = {
+                                "descripcion": request.form.get(f"{comida}_desc", ""),
+                                **valores
+                            }
+                        except ValueError:
+                            flash(f"Los valores para {comida} deben ser números válidos", "error")
+                            return redirect(url_for("plan.editar_dia", cliente_email=cliente_email, safe_id=safe_id, fecha=fecha))
+                    # Si la comida ya existe en el plan predefinido
+                    elif comida in comidas and (request.form.get(f"{comida}_desc") or request.form.get(f"{comida}_cal")):
                         try:
                             valores = {
                                 "calorias": int(request.form.get(f"{comida}_cal", comidas[comida]["calorias"])),

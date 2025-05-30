@@ -55,9 +55,7 @@
                         Mantenimiento</option>
                     <option value="Definición" {% if cliente.objetivo=='Definición' %}selected{% endif %}>Definición
                     </option>
-                    <option value="{{ cliente.objetivo }}" {% if cliente.objetivo not in ['Volumen', 'Mantenimiento'
-                        , 'Definición' ] %}selected{% endif %} {% if cliente.objetivo in ['Volumen', 'Mantenimiento'
-                        , 'Definición' ] %}hidden{% endif %}>
+                    <option value="{{ cliente.objetivo }}" {% if cliente.objetivo not in ['Volumen', 'Mantenimiento' , 'Definición' ] %}selected{% endif %} {% if cliente.objetivo in ['Volumen', 'Mantenimiento', 'Definición' ] %}hidden{% endif %}>
                         {{ cliente.objetivo }}
                     </option>
                 </select>

@@ -65,19 +65,29 @@ def dashboard_cliente(cliente_email):
         return redirect(url_for("cliente.lista_clientes"))   
     semanas = list(g.srp.filter(SemanaNutricional, lambda s: s.cliente_email == cliente_email))
     semanas.sort(key=lambda s: s.fecha_inicio, reverse=True)
-    
     semanas_data = []
     for semana in semanas:
         safe_id = g.srp.safe_from_oid(semana.__oid__)
+        # Asegurar que fecha_inicio y fecha_fin son objetos date
+        fecha_inicio = semana.fecha_inicio
+        if hasattr(fecha_inicio, 'date'):
+            fecha_inicio = fecha_inicio.date()
+            
+        fecha_fin = semana.fecha_fin
+        if hasattr(fecha_fin, 'date'):
+            fecha_fin = fecha_fin.date()
+            
         semanas_data.append({
             "semana": semana,
             "safe_id": safe_id,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin
         })
     
-    # Pasar la fecha actual para comparaciones en el template
-    now = datetime.now()
+    # Pasar la fecha actual como date para comparaciones en el template
+    today = datetime.now().date()
 
-    return render_template("clientes/dashboard.html", cliente=cliente, semanas=semanas_data, now=now)
+    return render_template("clientes/dashboard.html", cliente=cliente, semanas=semanas_data, today=today)
 
 @bp.route("/<cliente_email>/eliminar")
 @login_required

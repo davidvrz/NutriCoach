@@ -12,11 +12,12 @@ NutriCoach{% endblock %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ url_for('cliente.lista_clientes') }}">Clientes</a></li>
-        <li class="breadcrumb-item"><a
-                href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">Dashboard
-                Cliente</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Semana {{ semana.fecha_inicio.strftime("%d/%m") }} - {{
-            semana.fecha_fin.strftime("%d/%m") }}</li>
+        <li class="breadcrumb-item">
+            <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}">Dashboard Cliente</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            Semana {{ semana.fecha_inicio.strftime("%d/%m") }} - {{ semana.fecha_fin.strftime("%d/%m") }}
+        </li>
     </ol>
 </nav>
 
@@ -26,7 +27,8 @@ NutriCoach{% endblock %}
             <i class="fas fa-calendar-week me-2 text-success"></i>Semana de seguimiento
         </h1>
         <h2 class="h5 text-muted fw-normal">{{ semana.fecha_inicio.strftime("%d/%m/%Y") }} - {{
-            semana.fecha_fin.strftime("%d/%m/%Y") }}</h2>
+            semana.fecha_fin.strftime("%d/%m/%Y") }}
+        </h2>
     </div>
     <div>
         <a href="{{ url_for('cliente.dashboard_cliente', cliente_email=cliente_email) }}" class="btn btn-secondary">
@@ -53,26 +55,26 @@ NutriCoach{% endblock %}
             <div class="row g-3">
                 <div class="col-md-3 col-sm-6">
                     <div class="bg-light rounded p-3 text-center h-100">
-                        <span class="d-block fs-4 fw-bold text-success">{{ semana.objetivos.calorias }}</span>
-                        <span class="text-muted small">kcal</span>
+                        <div class="fw-bold">Calorías:</div>
+                        <div>{{ semana.objetivos.calorias }}</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="bg-light rounded p-3 text-center h-100">
-                        <span class="d-block fs-4 fw-bold text-success">{{ semana.objetivos.proteinas }}</span>
-                        <span class="text-muted small">g proteínas</span>
+                        <div class="fw-bold">Proteínas:</div>
+                        <div>{{ semana.objetivos.proteinas }}</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="bg-light rounded p-3 text-center h-100">
-                        <span class="d-block fs-4 fw-bold text-success">{{ semana.objetivos.hidratos }}</span>
-                        <span class="text-muted small">g hidratos</span>
+                        <div class="fw-bold">Hidratos:</div>
+                        <div>{{ semana.objetivos.hidratos }}</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="bg-light rounded p-3 text-center h-100">
-                        <span class="d-block fs-4 fw-bold text-success">{{ semana.objetivos.grasas }}</span>
-                        <span class="text-muted small">g grasas</span>
+                        <div class="fw-bold">Grasas:</div>
+                        <div>{{ semana.objetivos.grasas }}</div>
                     </div>
                 </div>
             </div>
@@ -163,10 +165,10 @@ NutriCoach{% endblock %}
             diaActual.querySelector('.card-footer').classList.add('bg-success', 'bg-opacity-10');
         }
 
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         if (tooltipTriggerList.length > 0) {
             tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         }
     });

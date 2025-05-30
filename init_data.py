@@ -33,7 +33,7 @@ def init_data():
         edad=30,
         peso=65.5,
         altura=165,
-        objetivo="Pérdida de peso",
+        objetivo="Definición",
         coach_email="coach@example.com"
     )
     
@@ -43,7 +43,7 @@ def init_data():
         edad=42,
         peso=80,
         altura=178,
-        objetivo="Ganancia muscular",
+        objetivo="Volumen",
         coach_email="coach@example.com"
     )
     
@@ -61,13 +61,6 @@ def init_data():
             "proteinas": 20,
             "hidratos": 30,
             "grasas": 15
-        },
-        "media_mañana": {
-            "descripcion": "Batido de proteínas con plátano",
-            "calorias": 250,
-            "proteinas": 25,
-            "hidratos": 25,
-            "grasas": 3
         },
         "comida": {
             "descripcion": "Salmón al horno con patatas y brócoli",
@@ -97,7 +90,7 @@ def init_data():
         nombre="Plan Alto en Proteínas",
         descripcion="Plan equilibrado con énfasis en proteínas para recuperación muscular y saciedad",
         comidas=comidas_plan_predefinido,
-        tipo="proteico"
+        tipo="Definición"
     )
     
     # Guardar plan predefinido
@@ -141,19 +134,19 @@ def init_data():
             "hidratos": 45,
             "grasas": 5
         },
-        "media_mañana": {
-            "descripcion": "Yogur desnatado con manzana",
-            "calorias": 180,
-            "proteinas": 10,
-            "hidratos": 20,
-            "grasas": 2
-        },
         "comida": {
             "descripcion": "Pechuga de pollo con arroz integral y verduras",
             "calorias": 420,
             "proteinas": 35,
             "hidratos": 40,
             "grasas": 8
+        },
+        "merienda": {
+            "descripcion": "Yogur desnatado con manzana",
+            "calorias": 180,
+            "proteinas": 10,
+            "hidratos": 20,
+            "grasas": 2
         },
         "cena": {
             "descripcion": "Pescado a la plancha con ensalada",
@@ -166,7 +159,7 @@ def init_data():
     
     plan_hoy_c1 = PlanAlimenticioDiario(
         id_semana=oid_semana_c1,
-        fecha=hoy,
+        fecha=hoy.date(),
         estado="Completado",
         notas="La cliente ha seguido bien el plan de hoy",
         comidas=comidas_c1,
@@ -202,20 +195,21 @@ def init_data():
     print(f"✅ Semana nutricional creada para cliente2 ({fecha_inicio_c2.strftime('%d/%m/%Y')} - {fecha_fin_c2.strftime('%d/%m/%Y')})")
     
     # Crear plan diario para cliente2 (usando el plan predefinido, para mañana)
-    manana = hoy + timedelta(days=1)
+    mañana = hoy + timedelta(days=1)    # Usar el plan predefinido para el cliente2
+    # Convertir el OID a safe_id que es lo que espera la aplicación
+    plan_predefinido_safe_id = srp.safe_from_oid(oid_plan_predefinido)
     
-    # Usar el plan predefinido para el cliente2
-    plan_manana_c2 = PlanAlimenticioDiario(
+    plan_mañana_c2 = PlanAlimenticioDiario(
         id_semana=oid_semana_c2,
-        fecha=manana,
+        fecha=mañana.date(),
         estado="Pendiente",
         notas="Plan basado en el predefinido 'Plan Alto en Proteínas'",
         comidas=comidas_plan_predefinido,
-        plan_predefinido_id=oid_plan_predefinido  # Este plan está basado en uno predefinido
+        plan_predefinido_id=plan_predefinido_safe_id  # Este plan está basado en uno predefinido (como safe_id)
     )
     
-    srp.save(plan_manana_c2)
-    print(f"✅ Plan diario creado para cliente2, fecha: {manana.strftime('%d/%m/%Y')}")
+    srp.save(plan_mañana_c2)
+    print(f"✅ Plan diario creado para cliente2, fecha: {mañana.strftime('%d/%m/%Y')}")
     
     print("\nDatos inicializados correctamente. Ahora puedes ejecutar la aplicación con:")
     print("python app.py")

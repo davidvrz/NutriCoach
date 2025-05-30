@@ -60,13 +60,13 @@
             {% set semana = s.semana %}
             {% set safe_id = s.safe_id %}
             {% set index = loop.index %}
-            {% set today = now %}
-            {% set is_current = semana.fecha_inicio.date() <= today.date() and today.date() <=semana.fecha_fin.date() %}
-                <div class="timeline-card card {% if is_current %}current border-success{% endif %}">
+            {% set is_current = s.fecha_inicio <= today and today <=s.fecha_fin %} <div
+                class="timeline-card card {% if is_current %}current border-success{% endif %}">
                 <div class="timeline-dot"></div>
                 <div class="card-header bg-light">
-                    <div class="timeline-date">{{ semana.fecha_inicio.strftime("%d/%m") }} - {{
-                        semana.fecha_fin.strftime("%d/%m") }}</div>
+                    <div class="timeline-date">
+                        {{ semana.fecha_inicio.strftime("%d/%m") }} - {{ semana.fecha_fin.strftime("%d/%m") }}
+                    </div>
                     <div class="text-muted">{{ semana.estado_general }}</div>
                 </div>
                 <div class="card-body text-center">
