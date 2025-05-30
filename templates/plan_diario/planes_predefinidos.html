@@ -46,12 +46,11 @@
                 </div>
             </div>
             <div class="card-footer bg-white border-top d-flex justify-content-between">
-                <a href="{{ url_for('plan.editar_plan_predefinido', safe_id=plan.safe_id) }}"
-                    class="btn btn-info btn-sm">
+                <a href="{{ url_for('plan.editar_plan_predefinido', safe_id=plan.safe_id) }}" class="btn-editar"
+                    title="Editar plan predefinido">
                     <i class="fas fa-edit me-1"></i>Editar
                 </a>
-                <a href="{{ url_for('plan.eliminar_plan_predefinido', safe_id=plan.safe_id) }}"
-                    class="btn btn-danger btn-sm"
+                <a href="{{ url_for('plan.eliminar_plan_predefinido', safe_id=plan.safe_id) }}" class="btn-eliminar"
                     data-confirm="¿Estás seguro de que deseas eliminar este plan predefinido? Esta acción no se puede deshacer.">
                     <i class="fas fa-trash-alt me-1"></i>Eliminar
                 </a>

@@ -152,6 +152,26 @@ ul.list-unstyled {
     text-decoration: none;
 }
 
+/* Botón para editar */
+.btn-editar {
+    background-color: #0288D1;
+    /* Darker blue */
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.btn-editar:hover {
+    background-color: #01579B;
+    /* Even darker blue for hover */
+    color: white;
+    text-decoration: none;
+}
+
 /* Componentes de la lista de clientes */
 .cliente-item {
     display: flex;

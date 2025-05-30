@@ -18,9 +18,15 @@
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="card-title h5 mb-0">Información del cliente</h2>
-            <a href="{{ url_for('cliente.editar_cliente', cliente_email=cliente.email) }}" class="btn btn-sm btn-info">
-                <i class="fas fa-edit me-1"></i>Editar datos
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('cliente.editar_cliente', cliente_email=cliente.email) }}" class="btn-editar">
+                    <i class="fas fa-edit me-1"></i>Editar datos
+                </a>
+                <a href="{{ url_for('cliente.eliminar_cliente', cliente_email=cliente.email) }}" class="btn-eliminar"
+                    data-confirm="¿Estás seguro de que deseas eliminar a este cliente y todos sus datos? Esta acción no se puede deshacer.">
+                    <i class="fas fa-trash-alt me-1"></i>Eliminar
+                </a>
+            </div>
         </div>
         <div class="row">
             <div class="col-md-6 mb-2">
@@ -55,9 +61,8 @@
             {% set safe_id = s.safe_id %}
             {% set index = loop.index %}
             {% set today = now %}
-            {% set is_current = semana.fecha_inicio.date() <= today.date() and today.date() <= semana.fecha_fin.date() %}
-            <div
-                class="timeline-card card {% if is_current %}current border-success{% endif %}">
+            {% set is_current = semana.fecha_inicio.date() <= today.date() and today.date() <=semana.fecha_fin.date() %}
+                <div class="timeline-card card {% if is_current %}current border-success{% endif %}">
                 <div class="timeline-dot"></div>
                 <div class="card-header bg-light">
                     <div class="timeline-date">{{ semana.fecha_inicio.strftime("%d/%m") }} - {{
