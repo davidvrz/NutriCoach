@@ -4,6 +4,11 @@ NutriCoach es una aplicación web moderna para nutricionistas que permite gestio
 
 ## Configuración del entorno
 
+### 0. Requisitos previos
+
+- Python 3.8 o superior
+- Redis (base de datos en memoria)
+
 ### 1. Clonar el repositorio
 
 ```bash
@@ -15,8 +20,8 @@ cd NutriCoach
 
 ```bash
 # Windows
-python -m venv venv
-venv\Scripts\activate
+python -m venv venv # o py -m venv venv
+venv\Scripts\Activate.ps1 
 pip install -r requirements.txt
 
 # Linux/macOS

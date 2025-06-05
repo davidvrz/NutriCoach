@@ -7,4 +7,5 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
 redis==6.0.0
+sirope @ git+https://github.com/Baltasarq/sirope.git@56f76168cb7d4c41cb9606db6a2102a6d7cae4be
 Werkzeug==3.1.3
