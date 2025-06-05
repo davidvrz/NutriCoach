@@ -1,3 +1,7 @@
+"""Módulo de autenticación para NutriCoach.
+Este módulo gestiona el registro, inicio de sesión y cierre de sesión de los usuarios (coaches).
+"""
+
 from flask import Blueprint, render_template, request, redirect, flash, url_for, session, g
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,6 +12,10 @@ bp = Blueprint("auth", __name__)
 
 @bp.route("/register", methods=["GET", "POST"])
 def register():
+    """Maneja el registro de nuevos coaches.
+    
+    :return: Redirige al dashboard del cliente si el registro es exitoso, o vuelve al formulario con errores.
+    """
     errors = {}
     if request.method == "POST":
         email = request.form["email"]
@@ -45,9 +53,7 @@ def register():
             login_user(coach)
             return redirect(url_for("cliente.lista_clientes"))
         else:
-            # Flash solo un mensaje genérico de error
             flash("Por favor, corrige los errores en el formulario", "error")
-            # Guardar los valores del formulario para mantenerlos
             session['form_values'] = request.form
             session['form_errors'] = errors
             return redirect(url_for("auth.register"))
@@ -58,6 +64,10 @@ def register():
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
+    """Maneja el inicio de sesión de los coaches.
+
+    :return: Redirige al dashboard del cliente si el inicio de sesión es exitoso, o vuelve al formulario con errores.
+    """
     errors = {}
     if request.method == "POST":
         email = request.form["email"]
@@ -93,5 +103,9 @@ def login():
 @bp.route("/logout")
 @login_required
 def logout():
+    """Maneja el cierre de sesión de los coaches.
+
+    :return: Redirige al formulario de inicio de sesión después de cerrar la sesión.
+    """
     logout_user()
     return redirect(url_for("auth.login"))

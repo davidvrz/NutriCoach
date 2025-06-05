@@ -1,3 +1,5 @@
+"""Módulo para gestionar las operaciones relacionadas con los clientes en la aplicación NutriCoach."""
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g
 from flask_login import login_required, current_user
 from models.cliente import Cliente
@@ -10,12 +12,20 @@ bp = Blueprint("cliente", __name__, url_prefix="/clientes")
 @bp.route("/")
 @login_required
 def lista_clientes():
+    """Recupera y muestra una lista de clientes asociados con el coach actual.
+
+    :return: Plantilla renderizada que muestra la lista de clientes.
+    """
     clientes = g.srp.filter(Cliente, lambda c: c.coach_email == current_user.email)
     return render_template("clientes/lista.html", clientes=clientes)
 
 @bp.route("/nuevo", methods=["GET", "POST"])
 @login_required
 def nuevo_cliente():
+    """Gestiona la creación de un nuevo cliente.
+
+    :return: Redirige a la lista de clientes o renderiza el formulario para un nuevo cliente.
+    """
     if request.method == "POST":    
         nombre = request.form["nombre"]
         email = request.form["email"]
@@ -58,6 +68,11 @@ def nuevo_cliente():
 @bp.route("/<cliente_email>")
 @login_required
 def dashboard_cliente(cliente_email):
+    """Muestra el panel de control de un cliente específico.
+
+    :param cliente_email: Correo electrónico del cliente para mostrar el panel de control.
+    :return: Plantilla renderizada que muestra el panel de control del cliente.
+    """
     cliente = g.srp.find_first(Cliente, lambda c: c.email == cliente_email and c.coach_email == current_user.email)
     
     if not cliente:
@@ -68,7 +83,6 @@ def dashboard_cliente(cliente_email):
     semanas_data = []
     for semana in semanas:
         safe_id = g.srp.safe_from_oid(semana.__oid__)
-        # Asegurar que fecha_inicio y fecha_fin son objetos date
         fecha_inicio = semana.fecha_inicio
         if hasattr(fecha_inicio, 'date'):
             fecha_inicio = fecha_inicio.date()
@@ -92,17 +106,19 @@ def dashboard_cliente(cliente_email):
 @bp.route("/<cliente_email>/eliminar")
 @login_required
 def eliminar_cliente(cliente_email):
+    """Elimina un cliente y todos los datos asociados.
+
+    :param cliente_email: Correo electrónico del cliente a eliminar.
+    :return: Redirige a la lista de clientes.
+    """
     try:
-        # Verificar que el cliente existe y pertenece al coach actual
         cliente = g.srp.find_first(Cliente, lambda c: c.email == cliente_email and c.coach_email == current_user.email)
         if not cliente:
             flash("Cliente no encontrado", "error")
             return redirect(url_for("cliente.lista_clientes"))
 
-        # Buscar y eliminar las semanas y sus planes alimenticios asociados
         cliente_id = cliente.__oid__
         
-        # Eliminar todas las semanas y planes relacionados
         semanas = list(g.srp.filter(SemanaNutricional, lambda s: s.cliente_email == cliente.email))
         for semana in semanas:
             semana_oid = semana.__oid__
@@ -111,7 +127,6 @@ def eliminar_cliente(cliente_email):
                 g.srp.delete(plan.__oid__)
             g.srp.delete(semana_oid)
         
-        # Finalmente eliminar el cliente
         g.srp.delete(cliente_id)
         
         flash("Cliente eliminado con éxito", "success")
@@ -123,7 +138,11 @@ def eliminar_cliente(cliente_email):
 @bp.route("/editar/<cliente_email>", methods=["GET", "POST"])
 @login_required
 def editar_cliente(cliente_email):
-    # Verificar que el cliente existe y pertenece al coach actual
+    """Edita los detalles de un cliente existente.
+
+    :param cliente_email: Correo electrónico del cliente a editar.
+    :return: Redirige al panel del cliente o renderiza el formulario de edición.
+    """
     cliente = g.srp.find_first(Cliente, lambda c: c.email == cliente_email and c.coach_email == current_user.email)
     
     if not cliente:
@@ -134,7 +153,6 @@ def editar_cliente(cliente_email):
         nombre = request.form["nombre"]
         objetivo = request.form.get("objetivo")
         
-        # Validaciones básicas
         if not nombre or not objetivo:
             flash("Todos los campos obligatorios deben ser completados", "error")
             return redirect(url_for("cliente.editar_cliente", cliente_email=cliente_email))
@@ -143,7 +161,6 @@ def editar_cliente(cliente_email):
             flash("El nombre debe tener al menos 2 caracteres y el objetivo al menos 3", "error")
             return redirect(url_for("cliente.editar_cliente", cliente_email=cliente_email))
             
-        # Validar campos numéricos
         try:
             edad = int(request.form["edad"])
             peso = float(request.form["peso"])

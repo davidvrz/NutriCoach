@@ -2,18 +2,12 @@
 
 NutriCoach es una aplicación web moderna para nutricionistas que permite gestionar planes alimenticios de sus clientes. Desarrollada con Flask y Bootstrap para una interfaz de usuario elegante y responsiva.
 
-## Requisitos
-
-- Python 3.9 o superior
-- Redis (para la base de datos Sirope)
-- pip (para instalar dependencias)
-
 ## Configuración del entorno
 
 ### 1. Clonar el repositorio
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/davidvrz/NutriCoach.git
 cd NutriCoach
 ```
 
@@ -108,7 +102,7 @@ NutriCoach/
 ├── init_data.py        # Script para inicializar datos de ejemplo
 ├── controllers/        # Controladores de la aplicación (rutas)
 ├── models/             # Modelos de datos
-├── static/             # Archivos estáticos (CSS, JS, imágenes)
+├── static/             # Estilos de la aplicación (Bootstrap)
 └── templates/          # Plantillas HTML (Jinja2)
 ```
 
@@ -118,9 +112,6 @@ NutriCoach/
 - Creación de planes alimenticios diarios
 - Seguimiento semanal nutricional
 - Planes predefinidos reutilizables
-
-## Resolución de problemas
-
 ### Si Redis no se conecta:
 
 1. Verifica que el servicio Redis esté en ejecución:

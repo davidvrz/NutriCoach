@@ -1,3 +1,5 @@
+"""Módulo para gestionar los planes alimenticios en la aplicación NutriCoach."""
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g, jsonify
 from flask_login import login_required, current_user
 from models.plan_diario import PlanAlimenticioDiario, PlanPredefinido
@@ -9,6 +11,13 @@ bp = Blueprint("plan", __name__, url_prefix="/planes")
 @bp.route("/<cliente_email>/semana/<safe_id>/editar/<fecha>", methods=["GET", "POST"])
 @login_required
 def editar_dia(cliente_email, safe_id, fecha):
+    """Edita el plan alimenticio de un día específico dentro de una semana nutricional.
+
+    :param cliente_email: Correo electrónico del cliente.
+    :param safe_id: Identificador seguro de la semana nutricional.
+    :param fecha: Fecha del día a editar en formato 'YYYY-MM-DD'.
+    :return: Redirige a la vista del cliente o renderiza el formulario de edición del día.
+    """
     try:
         oid = g.srp.oid_from_safe(safe_id)
         semana = g.srp.load(oid)
@@ -42,11 +51,9 @@ def editar_dia(cliente_email, safe_id, fecha):
                 predefinido_oid = g.srp.oid_from_safe(plan_predefinido_id)
                 plan_predefinido = g.srp.load(predefinido_oid)
                 
-                # Usar las comidas del plan predefinido
                 comidas = plan_predefinido.comidas.copy()
                   # Actualizar cualquier valor específico modificado en el formulario
                 for comida in ["desayuno", "comida", "merienda", "cena", "snacks"]:
-                    # Si la comida no existe en el plan predefinido pero se ha añadido en el formulario
                     if comida not in comidas and (request.form.get(f"{comida}_desc") or request.form.get(f"{comida}_cal")):
                         try:
                             valores = {
@@ -70,7 +77,6 @@ def editar_dia(cliente_email, safe_id, fecha):
                         except ValueError:
                             flash(f"Los valores para {comida} deben ser números válidos", "error")
                             return redirect(url_for("plan.editar_dia", cliente_email=cliente_email, safe_id=safe_id, fecha=fecha))
-                    # Si la comida ya existe en el plan predefinido
                     elif comida in comidas and (request.form.get(f"{comida}_desc") or request.form.get(f"{comida}_cal")):
                         try:
                             valores = {
@@ -161,6 +167,11 @@ def editar_dia(cliente_email, safe_id, fecha):
 @bp.route("/predefinido/<safe_id>", methods=["GET"])
 @login_required
 def obtener_plan_predefinido(safe_id):
+    """Obtiene los detalles de un plan predefinido.
+
+    :param safe_id: Identificador seguro del plan predefinido.
+    :return: JSON con los detalles del plan predefinido o un mensaje de error.
+    """
     try:
         oid = g.srp.oid_from_safe(safe_id)
         plan = g.srp.load(oid)
@@ -181,6 +192,10 @@ def obtener_plan_predefinido(safe_id):
 @bp.route("/predefinidos")
 @login_required
 def lista_planes_predefinidos():
+    """Muestra una lista de planes predefinidos creados por el coach actual.
+
+    :return: Plantilla renderizada con la lista de planes predefinidos.
+    """
     planes = list(g.srp.filter(PlanPredefinido, lambda p: p.coach_email == current_user.email))
     planes.sort(key=lambda p: p.actualizado, reverse=True)  
 
@@ -195,6 +210,10 @@ def lista_planes_predefinidos():
 @bp.route("/predefinidos/nuevo", methods=["GET", "POST"])
 @login_required
 def nuevo_plan_predefinido():
+    """Crea un nuevo plan predefinido.
+
+    :return: Redirige a la lista de planes predefinidos o renderiza el formulario de creación.
+    """
     if request.method == "POST":
         nombre = request.form["nombre"]
         descripcion = request.form["descripcion"]
@@ -240,6 +259,11 @@ def nuevo_plan_predefinido():
 @bp.route("/predefinidos/editar/<safe_id>", methods=["GET", "POST"])
 @login_required
 def editar_plan_predefinido(safe_id):
+    """Edita un plan predefinido existente.
+
+    :param safe_id: Identificador seguro del plan predefinido.
+    :return: Redirige a la lista de planes predefinidos o renderiza el formulario de edición.
+    """
     try:
         oid = g.srp.oid_from_safe(safe_id)
         plan = g.srp.load(oid)
@@ -301,6 +325,11 @@ def editar_plan_predefinido(safe_id):
 @bp.route("/predefinidos/eliminar/<safe_id>")
 @login_required
 def eliminar_plan_predefinido(safe_id):
+    """Elimina un plan predefinido.
+
+    :param safe_id: Identificador seguro del plan predefinido.
+    :return: Redirige a la lista de planes predefinidos.
+    """
     try:
         oid = g.srp.oid_from_safe(safe_id)
         plan = g.srp.load(oid)
